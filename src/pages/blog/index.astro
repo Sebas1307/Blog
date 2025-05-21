@@ -1,111 +1,196 @@
 ---
-import BaseHead from '../../components/BaseHead.astro';
-import Header from '../../components/Header.astro';
-import Footer from '../../components/Footer.astro';
-import { SITE_TITLE, SITE_DESCRIPTION } from '../../consts';
-import { getCollection } from 'astro:content';
-import FormattedDate from '../../components/FormattedDate.astro';
+import MainLayout from '../../layouts/MainLayout.astro'
+import { getCollection } from 'astro:content'
+import BlogPost from '../../components/BlogPost.astro'
 
 const posts = (await getCollection('blog')).sort(
-	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
-);
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+)
+
+// Debug: Mostrar información detallada de los posts
+console.log('Información detallada de los posts:')
+posts.forEach(post => {
+  console.log('Post:', {
+    title: post.data.title,
+    categories: post.data.category,
+    rawData: post.data
+  })
+})
+
+// Obtener todas las categorías únicas de los posts
+const categoriasBase = ['Finanzas', 'Inversiones', 'Blockchain'];
+const allCategories = Array.from(
+  new Set(posts.flatMap((post) => {
+    const categories = post.data.category || []
+    return Array.isArray(categories) ? categories : [categories]
+  }))
+)
+const categories = ['Todos', ...new Set([...categoriasBase, ...allCategories])]
+
+// Debug: Mostrar las categorías disponibles
+console.log('Categorías disponibles:', categories)
 ---
 
-<!doctype html>
-<html lang="en">
-	<head>
-		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
-		<style>
-			main {
-				width: 960px;
-			}
-			ul {
-				display: flex;
-				flex-wrap: wrap;
-				gap: 2rem;
-				list-style-type: none;
-				margin: 0;
-				padding: 0;
-			}
-			ul li {
-				width: calc(50% - 1rem);
-			}
-			ul li * {
-				text-decoration: none;
-				transition: 0.2s ease;
-			}
-			ul li:first-child {
-				width: 100%;
-				margin-bottom: 1rem;
-				text-align: center;
-			}
-			ul li:first-child img {
-				width: 100%;
-			}
-			ul li:first-child .title {
-				font-size: 2.369rem;
-			}
-			ul li img {
-				margin-bottom: 0.5rem;
-				border-radius: 12px;
-			}
-			ul li a {
-				display: block;
-			}
-			.title {
-				margin: 0;
-				color: rgb(var(--black));
-				line-height: 1;
-			}
-			.date {
-				margin: 0;
-				color: rgb(var(--gray));
-			}
-			ul li a:hover h4,
-			ul li a:hover .date {
-				color: rgb(var(--accent));
-			}
-			ul a:hover img {
-				box-shadow: var(--box-shadow);
-			}
-			@media (max-width: 720px) {
-				ul {
-					gap: 0.5em;
-				}
-				ul li {
-					width: 100%;
-					text-align: center;
-				}
-				ul li:first-child {
-					margin-bottom: 0;
-				}
-				ul li:first-child .title {
-					font-size: 1.563em;
-				}
-			}
-		</style>
-	</head>
-	<body>
-		<Header />
-		<main>
-			<section>
-				<ul>
-					{
-						posts.map((post) => (
-							<li>
-								<a href={`/blog/${post.id}/`}>
-									<img width={720} height={360} src={post.data.heroImage} alt="" />
-									<h4 class="title">{post.data.title}</h4>
-									<p class="date">
-										<FormattedDate date={post.data.pubDate} />
-									</p>
-								</a>
-							</li>
-						))
-					}
-				</ul>
-			</section>
-		</main>
-		<Footer />
-	</body>
-</html>
+<MainLayout>
+  <main class='container mx-auto px-4 py-8'>
+    <!-- Filtros -->
+    <section class='mb-8'>
+      <div class='flex flex-wrap gap-4 items-center'>
+        <h2 class='text-xl font-semibold'>Filtrar por categoría:</h2>
+        <div
+          class='flex flex-wrap gap-2'
+          id='category-buttons'
+        >
+          {
+            categories.map((category) => (
+              <button
+                class='px-4 py-2 bg-white text-gray-900 rounded-full shadow-sm hover:bg-gray-100 transition-colors cursor-pointer'
+                data-category={category}
+              >
+                {category}
+              </button>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- Buscador -->
+    <section class='mb-8'>
+      <div class='max-w-xl'>
+        <input
+          type='search'
+          placeholder='Buscar artículos...'
+          class='w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500'
+        />
+      </div>
+    </section>
+
+    <!-- Lista de Posts -->
+    <section
+      class='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-8'
+      id='posts-container'
+    >
+      {
+        posts.map((post) => {
+          const categories = post.data.category || []
+          const categoryArray = Array.isArray(categories) ? categories : [categories]
+          return (
+            <div 
+              data-categories={JSON.stringify(categoryArray)}
+              class="mb-8"
+            >
+              <BlogPost
+                title={post.data.title}
+                pubDate={post.data.pubDate}
+                heroImage={post.data.heroImage || '/default-hero.jpg'}
+                slug={post.id}
+                categories={categoryArray}
+              />
+            </div>
+          )
+        })
+      }
+    </section>
+  </main>
+
+  <script>
+    let selectedCategories: string[] = ['Todos']
+    let searchText = ''
+    const posts = Array.from(
+      document.querySelectorAll('#posts-container > div')
+    ) as HTMLElement[]
+    const buttons = Array.from(
+      document.querySelectorAll('#category-buttons button')
+    ) as HTMLElement[]
+    const searchInput = document.querySelector(
+      'input[type="search"]'
+    ) as HTMLInputElement
+
+    // Seleccionar "Todos" por defecto
+    const todosButton = buttons.find(btn => btn.dataset.category === 'Todos')
+    if (todosButton) {
+      todosButton.classList.add('bg-blue-400', 'text-white')
+      todosButton.classList.remove('bg-white', 'text-gray-900')
+    }
+
+    function filtrarPosts() {
+      console.log('Filtrando posts...')
+      console.log('Categorías seleccionadas:', selectedCategories)
+      
+      posts.forEach((post) => {
+        try {
+          const postCategories = JSON.parse(post.dataset.categories || '[]')
+          const titulo = post.querySelector('h3')?.textContent?.toLowerCase() || ''
+          const descripcion = post.querySelector('p')?.textContent?.toLowerCase() || ''
+          const textoCompleto = `${titulo} ${descripcion}`
+          
+          console.log('Post:', titulo)
+          console.log('Categorías del post:', postCategories)
+          
+          // Filtrar por categoría
+          const mostrarCategoria =
+            selectedCategories.includes('Todos') ||
+            selectedCategories.some((cat) => postCategories.includes(cat))
+          
+          // Filtrar por texto
+          const mostrarTexto =
+            searchText.trim() === '' ||
+            textoCompleto.includes(searchText.trim().toLowerCase())
+          
+          console.log('Mostrar por categoría:', mostrarCategoria)
+          console.log('Mostrar por texto:', mostrarTexto)
+          
+          // Mostrar solo si cumple ambos filtros
+          post.style.display =
+            mostrarCategoria && mostrarTexto ? 'block' : 'none'
+        } catch (error) {
+          console.error('Error al filtrar post:', error)
+          console.error('Datos del post:', post.dataset.categories)
+        }
+      })
+    }
+
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        searchText = searchInput.value
+        filtrarPosts()
+      })
+    }
+
+    buttons.forEach((button) => {
+      button.addEventListener('click', () => {
+        const cat = button.dataset.category
+        if (!cat) return
+
+        console.log('Botón clickeado:', cat)
+
+        // Si ya está seleccionado, no hacer nada
+        if (button.classList.contains('bg-blue-400')) {
+          return
+        }
+
+        // Deseleccionar el botón actual y seleccionar el nuevo
+        buttons.forEach((btn) => {
+          btn.classList.remove('bg-blue-400', 'text-white')
+          btn.classList.add('bg-white', 'text-gray-900')
+        })
+        selectedCategories = [cat]
+        button.classList.add('bg-blue-400', 'text-white')
+        button.classList.remove('bg-white', 'text-gray-900')
+
+        filtrarPosts()
+      })
+    })
+
+    // Siempre aseguramos que los botones tengan color de texto
+    buttons.forEach((button) => {
+      if (!button.classList.contains('bg-blue-500')) {
+        button.classList.add('text-gray-900')
+      }
+    })
+
+    // Mostrar todos los posts al inicio
+    filtrarPosts()
+  </script>
+</MainLayout>

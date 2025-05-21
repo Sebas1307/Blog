@@ -1,0 +1,146 @@
+---
+import TikTokVideo from '../../components/TikTokVideo.astro'
+import { TIKTOK_VIDEOS } from '../../constants/tiktok-videos'
+import MainLayout from '../../layouts/MainLayout.astro'
+const categories = ['Todos', 'Blockchain', 'Finanzas', 'Inversiones']
+
+// Definir los videos de TikTok
+const videos = TIKTOK_VIDEOS
+---
+
+<MainLayout>
+  <main class='container mx-auto px-4 py-8 my-2'>
+    <h1 class='text-4xl font-bold mb-8'>Videos</h1>
+
+    <!-- Filtros de Categoría -->
+    <section class='mb-8'>
+      <div class='flex flex-wrap gap-4 items-center'>
+        <h2 class='text-xl font-semibold'>Filtrar por categoría:</h2>
+        <div
+          class='flex flex-wrap gap-2'
+          id='category-buttons'
+        >
+          {
+            categories.map((category) => (
+              <button
+                class='px-4 py-2 bg-white text-gray-900 rounded-full shadow-sm hover:bg-gray-100 transition-colors cursor-pointer'
+                data-category={category}
+              >
+                {category}
+              </button>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- Buscador -->
+    <section class='mb-8'>
+      <div class='max-w-xl'>
+        <input
+          type='search'
+          placeholder='Buscar videos...'
+          class='w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2'
+        />
+      </div>
+    </section>
+
+    <!-- Lista de Videos -->
+    <section
+      class='grid grid-cols-1 md:grid-cols-[1fr_1fr]'
+      id='videos-container'
+    >
+      {
+        videos.map((video) => (
+          <TikTokVideo
+            url={video.url}
+            title={video.title}
+            category={video.category}
+          />
+        ))
+      }
+    </section>
+  </main>
+  <script>
+    let selectedCategories: string[] = ['Todos']
+    let searchText = ''
+    const videos = Array.from(
+      document.querySelectorAll('#videos-container > article')
+    ) as HTMLElement[]
+    const buttons = Array.from(
+      document.querySelectorAll('#category-buttons button')
+    ) as HTMLElement[]
+    const searchInput = document.querySelector(
+      'input[type="search"]'
+    ) as HTMLInputElement
+
+    // Seleccionar "Todos" por defecto
+    const todosButton = buttons.find(btn => btn.dataset.category === 'Todos')
+    if (todosButton) {
+      todosButton.classList.add('bg-blue-400', 'text-white')
+      todosButton.classList.remove('bg-white', 'text-gray-900')
+    }
+
+    function filtrarVideos() {
+      videos.forEach((video) => {
+        const videoCategories = (video.dataset.category || '').split(',')
+        const titulo =
+          video.querySelector('p')?.textContent?.toLowerCase() || ''
+        
+        // Filtrar por categoría
+        const mostrarCategoria =
+          selectedCategories.includes('Todos') ||
+          selectedCategories.some((cat) => videoCategories.includes(cat))
+        
+        // Filtrar por texto
+        const mostrarTexto =
+          searchText.trim() === '' ||
+          titulo.includes(searchText.trim().toLowerCase())
+        
+        // Mostrar solo si cumple ambos filtros
+        video.style.display =
+          mostrarCategoria && mostrarTexto ? 'block' : 'none'
+      })
+    }
+
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        searchText = searchInput.value
+        filtrarVideos()
+      })
+    }
+
+    buttons.forEach((button) => {
+      button.addEventListener('click', () => {
+        const cat = button.dataset.category
+        if (!cat) return
+
+        // Si ya está seleccionado, no hacer nada
+        if (button.classList.contains('bg-blue-400')) {
+          return
+        }
+
+        // Deseleccionar el botón actual y seleccionar el nuevo
+        buttons.forEach((btn) => {
+          btn.classList.remove('bg-blue-400', 'text-white')
+          btn.classList.add('bg-white', 'text-gray-900')
+        })
+        selectedCategories = [cat]
+        button.classList.add('bg-blue-400', 'text-white')
+        button.classList.remove('bg-white', 'text-gray-900')
+
+        filtrarVideos()
+      })
+    })
+
+    // Siempre aseguramos que los botones tengan color de texto
+    buttons.forEach((button) => {
+      if (!button.classList.contains('bg-blue-500')) {
+        button.classList.add('text-gray-900')
+      }
+    })
+
+    // Mostrar todos los videos al inicio
+    filtrarVideos()
+  </script>
+</MainLayout>
