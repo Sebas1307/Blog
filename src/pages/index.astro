@@ -1,12 +1,11 @@
 ---
 import TikTokVideo from '../components/TikTokVideo.astro'
 import BlogPost from '../components/BlogPost.astro'
+import SocialLinks from '../components/SocialLinks.astro'
 import { TIKTOK_VIDEOS } from '../constants/tiktok-videos'
-import { SOCIAL_LINKS } from '../consts'
 import MainLayout from '../layouts/MainLayout.astro'
 import { getCollection } from 'astro:content'
 
-const socialLinks = SOCIAL_LINKS
 const videos = TIKTOK_VIDEOS
 
 // Obtener los últimos 3 posts
@@ -27,26 +26,10 @@ const posts = (await getCollection('blog'))
     </section>
 
     <!-- Redes Sociales -->
-    <section class='flex flex-wrap justify-center gap-4 sm:gap-6 mb-8 sm:mb-12 lg:mb-16'>
-      {
-        socialLinks.map((link) => (
-          <a
-            href={link.href}
-            class='flex items-center text-xl sm:text-2xl hover:text-blue-500 transition-colors'
-          >
-            <img
-              src={link.svg}
-              alt={link.text}
-              class='w-6 h-6 mr-2'
-            />
-            {link.text}
-          </a>
-        ))
-      }
-    </section>
+    <SocialLinks />
 
     <!-- Últimos Posts -->
-    <section class='mb-8 sm:mb-12 lg:mb-16'>
+    <section class='mb-8 sm:mb-12 lg:mb-16 mt-16'>
       <h2 class='text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 sm:mb-6'>Últimos Posts</h2>
       <div class='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6'>
         {

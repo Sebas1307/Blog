@@ -1,0 +1,57 @@
+---
+interface Props {
+  name: string;
+  code: string;
+  description: string;
+  isActive?: boolean;
+  validFor?: string;
+  link?: string;
+}
+
+const { name, code, description, isActive = true, validFor = 'Válido para nuevos usuarios', link } = Astro.props;
+---
+
+<div class='bg-white rounded-lg p-4 sm:p-6 transition-shadow flex flex-col h-full border border-gray-200 shadow-lg hover:shadow-xl shadow-[#20ecaa]/20 hover:shadow-[#20ecaa]/30'>
+  <div class='mb-3 sm:mb-4'>
+    <h3 class='text-lg sm:text-xl font-semibold'>{name}: {code}</h3>
+    <div class="mt-2 flex justify-center sm:justify-end">
+      <span
+        class={`${
+          isActive
+            ? 'bg-green-100 text-green-800'
+            : 'bg-red-100 text-red-800'
+        } px-3 py-1 rounded-full text-sm font-medium w-fit`}
+      >
+        {isActive ? 'Activo' : 'Inactivo'}
+      </span>
+    </div>
+  </div>
+  {link && (
+    <a href={link} class='text-[#20ecaa] break-all hover:underline mb-2' target='_blank' rel='noopener noreferrer'>
+      {link}
+    </a>
+  )}
+  <p class='text-gray-600 text-sm sm:text-base mb-3 sm:mb-4'>{description}</p>
+  <span class='text-xs sm:text-sm text-gray-500 mb-4'>{validFor}</span>
+  <div class='mt-auto'>
+    <button
+      class='bg-[#20ecaa] text-white px-4 py-2 rounded hover:bg-[#1bc99a] transition-colors cursor-pointer text-sm sm:text-base w-full'
+      data-code={code}
+    >
+      Copiar código
+    </button>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('button[data-code]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const code = button.getAttribute('data-code');
+      if (code) {
+        navigator.clipboard.writeText(code);
+        // @ts-ignore
+        window.showToast('¡Código copiado!', 'success');
+      }
+    });
+  });
+</script> 

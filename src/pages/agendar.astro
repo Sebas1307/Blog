@@ -1,0 +1,16 @@
+---
+import MainLayout from '../layouts/MainLayout.astro'
+import ScheduleCall from '../components/ScheduleCall.astro'
+---
+
+<MainLayout title="Agendar reunión">
+  <div class="min-h-screen flex flex-col items-center justify-center py-16">
+    <h1 class="text-4xl font-bold mb-6 text-center">Agendar una reunión conmigo</h1>
+    <p class="text-lg text-gray-600 mb-8 text-center max-w-xl">
+      Reserva una llamada para que podamos conversar sobre tus ideas, proyectos o cualquier consulta que tengas.
+    </p>
+    <div class="w-full max-w-2xl">
+      <ScheduleCall calendlyUrl="https://calendly.com/sebastianpa138/new-meeting" />
+    </div>
+  </div>
+</MainLayout> 

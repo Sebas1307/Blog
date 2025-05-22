@@ -8,8 +8,7 @@ const posts = (await getCollection('blog')).sort(
 )
 
 // Debug: Mostrar información detallada de los posts
-console.log('Información detallada de los posts:')
-posts.forEach(post => {
+posts.forEach((post) => {
   console.log('Post:', {
     title: post.data.title,
     categories: post.data.category,
@@ -18,12 +17,14 @@ posts.forEach(post => {
 })
 
 // Obtener todas las categorías únicas de los posts
-const categoriasBase = ['Finanzas', 'Inversiones', 'Blockchain'];
+const categoriasBase = ['Finanzas', 'Inversiones', 'Blockchain']
 const allCategories = Array.from(
-  new Set(posts.flatMap((post) => {
-    const categories = post.data.category || []
-    return Array.isArray(categories) ? categories : [categories]
-  }))
+  new Set(
+    posts.flatMap((post) => {
+      const categories = post.data.category || []
+      return Array.isArray(categories) ? categories : [categories]
+    })
+  )
 )
 const categories = ['Todos', ...new Set([...categoriasBase, ...allCategories])]
 
@@ -74,11 +75,13 @@ console.log('Categorías disponibles:', categories)
       {
         posts.map((post) => {
           const categories = post.data.category || []
-          const categoryArray = Array.isArray(categories) ? categories : [categories]
+          const categoryArray = Array.isArray(categories)
+            ? categories
+            : [categories]
           return (
-            <div 
+            <div
               data-categories={JSON.stringify(categoryArray)}
-              class="mb-8"
+              class='mb-8'
             >
               <BlogPost
                 title={post.data.title}
@@ -95,102 +98,98 @@ console.log('Categorías disponibles:', categories)
   </main>
 
   <script>
-    let selectedCategories: string[] = ['Todos']
-    let searchText = ''
-    const posts = Array.from(
-      document.querySelectorAll('#posts-container > div')
-    ) as HTMLElement[]
-    const buttons = Array.from(
-      document.querySelectorAll('#category-buttons button')
-    ) as HTMLElement[]
-    const searchInput = document.querySelector(
-      'input[type="search"]'
-    ) as HTMLInputElement
+    function initializeFilters() {
+      let selectedCategories: string[] = ['Todos']
+      let searchText = ''
+      const posts = Array.from(
+        document.querySelectorAll('#posts-container > article')
+      ) as HTMLElement[]
+      const buttons = Array.from(
+        document.querySelectorAll('#category-buttons button')
+      ) as HTMLElement[]
+      const searchInput = document.querySelector(
+        'input[type="search"]'
+      ) as HTMLInputElement
 
-    // Seleccionar "Todos" por defecto
-    const todosButton = buttons.find(btn => btn.dataset.category === 'Todos')
-    if (todosButton) {
-      todosButton.classList.add('bg-blue-400', 'text-white')
-      todosButton.classList.remove('bg-white', 'text-gray-900')
-    }
-
-    function filtrarPosts() {
-      console.log('Filtrando posts...')
-      console.log('Categorías seleccionadas:', selectedCategories)
-      
-      posts.forEach((post) => {
-        try {
-          const postCategories = JSON.parse(post.dataset.categories || '[]')
-          const titulo = post.querySelector('h3')?.textContent?.toLowerCase() || ''
-          const descripcion = post.querySelector('p')?.textContent?.toLowerCase() || ''
-          const textoCompleto = `${titulo} ${descripcion}`
-          
-          console.log('Post:', titulo)
-          console.log('Categorías del post:', postCategories)
-          
-          // Filtrar por categoría
-          const mostrarCategoria =
-            selectedCategories.includes('Todos') ||
-            selectedCategories.some((cat) => postCategories.includes(cat))
-          
-          // Filtrar por texto
-          const mostrarTexto =
-            searchText.trim() === '' ||
-            textoCompleto.includes(searchText.trim().toLowerCase())
-          
-          console.log('Mostrar por categoría:', mostrarCategoria)
-          console.log('Mostrar por texto:', mostrarTexto)
-          
-          // Mostrar solo si cumple ambos filtros
-          post.style.display =
-            mostrarCategoria && mostrarTexto ? 'block' : 'none'
-        } catch (error) {
-          console.error('Error al filtrar post:', error)
-          console.error('Datos del post:', post.dataset.categories)
-        }
-      })
-    }
-
-    if (searchInput) {
-      searchInput.addEventListener('input', (e) => {
-        searchText = searchInput.value
-        filtrarPosts()
-      })
-    }
-
-    buttons.forEach((button) => {
-      button.addEventListener('click', () => {
-        const cat = button.dataset.category
-        if (!cat) return
-
-        console.log('Botón clickeado:', cat)
-
-        // Si ya está seleccionado, no hacer nada
-        if (button.classList.contains('bg-blue-400')) {
-          return
-        }
-
-        // Deseleccionar el botón actual y seleccionar el nuevo
-        buttons.forEach((btn) => {
-          btn.classList.remove('bg-blue-400', 'text-white')
-          btn.classList.add('bg-white', 'text-gray-900')
-        })
-        selectedCategories = [cat]
-        button.classList.add('bg-blue-400', 'text-white')
-        button.classList.remove('bg-white', 'text-gray-900')
-
-        filtrarPosts()
-      })
-    })
-
-    // Siempre aseguramos que los botones tengan color de texto
-    buttons.forEach((button) => {
-      if (!button.classList.contains('bg-blue-500')) {
-        button.classList.add('text-gray-900')
+      // Seleccionar "Todos" por defecto
+      const todosButton = buttons.find((btn) => btn.dataset.category === 'Todos')
+      if (todosButton) {
+        todosButton.classList.add('bg-blue-400', 'text-white')
+        todosButton.classList.remove('bg-white', 'text-gray-900')
       }
-    })
 
-    // Mostrar todos los posts al inicio
-    filtrarPosts()
+      function filtrarPosts() {
+        posts.forEach((post) => {
+          try {
+            const postCategories = JSON.parse(post.dataset.categories || '[]')
+            const titulo = post.querySelector('h6')?.textContent?.toLowerCase() || ''
+            
+            // Filtrar por categoría
+            const mostrarCategoria =
+              selectedCategories.includes('Todos') ||
+              selectedCategories.some((cat) => postCategories.includes(cat))
+            
+            // Filtrar por texto
+            const mostrarTexto =
+              !searchText.trim() ||
+              titulo.includes(searchText.trim().toLowerCase())
+            
+            // Mostrar solo si cumple ambos filtros
+            post.style.display =
+              mostrarCategoria && mostrarTexto ? 'block' : 'none'
+          } catch (error) {
+            console.error('Error al filtrar post:', error)
+            // En caso de error, mostrar el post
+            post.style.display = 'block'
+          }
+        })
+      }
+
+      if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+          searchText = (e.target as HTMLInputElement).value
+          filtrarPosts()
+        })
+      }
+
+      buttons.forEach((button) => {
+        button.addEventListener('click', () => {
+          const cat = button.dataset.category
+          if (!cat) return
+
+          // Si ya está seleccionado, no hacer nada
+          if (button.classList.contains('bg-blue-400')) {
+            return
+          }
+
+          // Deseleccionar el botón actual y seleccionar el nuevo
+          buttons.forEach((btn) => {
+            btn.classList.remove('bg-blue-400', 'text-white')
+            btn.classList.add('bg-white', 'text-gray-900')
+          })
+          selectedCategories = [cat]
+          button.classList.add('bg-blue-400', 'text-white')
+          button.classList.remove('bg-white', 'text-gray-900')
+
+          filtrarPosts()
+        })
+      })
+
+      // Siempre aseguramos que los botones tengan color de texto
+      buttons.forEach((button) => {
+        if (!button.classList.contains('bg-blue-500')) {
+          button.classList.add('text-gray-900')
+        }
+      })
+
+      // Mostrar todos los posts al inicio
+      filtrarPosts()
+    }
+
+    // Inicializar cuando el DOM esté listo
+    document.addEventListener('DOMContentLoaded', initializeFilters);
+
+    // Reinicializar después de la navegación de Astro
+    document.addEventListener('astro:after-swap', initializeFilters);
   </script>
 </MainLayout>

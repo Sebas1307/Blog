@@ -2,18 +2,32 @@
 import BaseHead from '../components/BaseHead.astro'
 import Header from '../components/Header.astro'
 import Footer from '../components/Footer.astro'
+import { ClientRouter, fade, slide } from 'astro:transitions'
 import '../styles/global.css'
 
 // Layout global para modo oscuro con fondo decorativo
-const { title, description, pubDate, heroImage } = Astro.props
+interface Props {
+  title?: string
+  description?: string
+  pubDate?: Date
+  heroImage?: string
+}
+
+const {
+  title = 'Sebastian Patiño | Blog',
+  description,
+  pubDate,
+  heroImage
+} = Astro.props
 ---
 
 <html lang='es'>
   <head>
     <BaseHead
       title={title}
-      description={description}
+      description={description ?? ''}
     />
+    <ClientRouter transition:animate="fade" />
   </head>
   <body class='min-h-screen bg-[#010000] relative'>
     <div class='absolute top-0 -z-10 h-full w-full'>
@@ -23,15 +37,15 @@ const { title, description, pubDate, heroImage } = Astro.props
       </div>
     </div>
     <Header />
-    <main class="container mx-auto px-4">
+    <main class='container mx-auto px-4' transition:animate="slide">
       <article>
         {
           heroImage && (
-            <div class='hero-image mb-8'>
+            <div class='hero-image mb-8' transition:animate="fade">
               <img
                 src={heroImage}
                 alt=''
-                class="w-[400px] h-[400px] rounded-lg"
+                class='w-[400px] h-[400px] rounded-lg'
               />
             </div>
           )
