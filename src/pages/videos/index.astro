@@ -91,7 +91,7 @@ const videos = TIKTOK_VIDEOS
             // Filtrar por categoría
             const mostrarCategoria =
               selectedCategories.includes('Todos') ||
-              selectedCategories.some(cat => videoCategories.includes(cat))
+              videoCategories.some(cat => selectedCategories.includes(cat))
             
             // Filtrar por texto
             const mostrarTexto =
