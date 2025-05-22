@@ -16,34 +16,39 @@ const posts = (await getCollection('blog'))
 ---
 
 <MainLayout>
-  <main class='container mx-auto px-4 py-8'>
+  <main class='container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12'>
     <!-- Sección Hero -->
-    <section class='text-center mb-16'>
-      <h1 class='text-5xl font-bold mb-4'>¡Hola! 👋</h1>
-      <p class='text-xl text-gray-600 max-w-2xl mx-auto'>
+    <section class='text-center mb-8 sm:mb-12 lg:mb-16'>
+      <h1 class='text-4xl sm:text-5xl lg:text-6xl font-bold mb-3 sm:mb-4'>¡Hola! 👋</h1>
+      <p class='text-lg sm:text-xl lg:text-2xl text-gray-600 max-w-2xl mx-auto px-4'>
         Bienvenido a mi espacio digital donde comparto conocimiento sobre
         finanzas, inversiones y blockchain.
       </p>
     </section>
 
     <!-- Redes Sociales -->
-    <section class='flex justify-center gap-6 mb-16'>
+    <section class='flex flex-wrap justify-center gap-4 sm:gap-6 mb-8 sm:mb-12 lg:mb-16'>
       {
         socialLinks.map((link) => (
           <a
             href={link.href}
-            class='text-2xl hover:text-blue-500 transition-colors'
+            class='flex items-center text-xl sm:text-2xl hover:text-blue-500 transition-colors'
           >
-            {link.icon} {link.text}
+            <img
+              src={link.svg}
+              alt={link.text}
+              class='w-6 h-6 mr-2'
+            />
+            {link.text}
           </a>
         ))
       }
     </section>
 
     <!-- Últimos Posts -->
-    <section class='mb-16'>
-      <h2 class='text-3xl font-bold mb-6'>Últimos Posts</h2>
-      <div class='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+    <section class='mb-8 sm:mb-12 lg:mb-16'>
+      <h2 class='text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 sm:mb-6'>Últimos Posts</h2>
+      <div class='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6'>
         {
           posts.map((post) => (
             <BlogPost
@@ -59,10 +64,10 @@ const posts = (await getCollection('blog'))
     </section>
 
     <!-- Últimos Videos -->
-    <section class='mb-16'>
-      <h2 class='text-3xl font-bold mb-6'>Últimos Videos</h2>
+    <section class='mb-8 sm:mb-12 lg:mb-16'>
+      <h2 class='text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 sm:mb-6'>Últimos Videos</h2>
       <section
-        class='grid grid-cols-1 md:grid-cols-[1fr_1fr]'
+        class='grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-4 sm:gap-6'
         id='videos-container'
       >
         {
