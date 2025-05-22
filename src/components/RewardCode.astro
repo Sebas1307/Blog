@@ -13,7 +13,8 @@ const { name, code, description, isActive = true, validFor = 'Válido para nuevo
 
 <div class='bg-white rounded-lg p-4 sm:p-6 transition-shadow flex flex-col h-full border border-gray-200 shadow-lg hover:shadow-xl shadow-[#20ecaa]/20 hover:shadow-[#20ecaa]/30'>
   <div class='mb-3 sm:mb-4'>
-    <h3 class='text-lg sm:text-xl font-semibold'>{name}: {code}</h3>
+    <h3 class='text-lg sm:text-xl font-semibold'>{name}</h3>
+    <p class='text-sm text-gray-600'>Código: {code}</p>
     <div class="mt-2 flex justify-center sm:justify-end">
       <span
         class={`${
