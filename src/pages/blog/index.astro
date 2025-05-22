@@ -102,7 +102,7 @@ console.log('Categorías disponibles:', categories)
       let selectedCategories: string[] = ['Todos']
       let searchText = ''
       const posts = Array.from(
-        document.querySelectorAll('#posts-container > article')
+        document.querySelectorAll('#posts-container > div')
       ) as HTMLElement[]
       const buttons = Array.from(
         document.querySelectorAll('#category-buttons button')
