@@ -83,17 +83,16 @@ const rewardCodes = [
     if (searchInput && grid) {
       searchInput.addEventListener('input', (e) => {
         try {
-          const value = (e.target as HTMLInputElement).value.toLowerCase();
+          const value = (e.target as HTMLInputElement).value.toLowerCase().trim();
+          
           cards.forEach(card => {
-            const h3 = card.querySelector('h3');
-            let name = '';
-            if (h3) {
-              const text = h3.textContent || '';
-              name = text.split(':')[0].trim().toLowerCase();
-            }
-            if (card instanceof HTMLElement) {
-              card.style.display = name.includes(value) ? '' : 'none';
-            }
+            if (!(card instanceof HTMLElement)) return;
+            
+            const nameElement = card.querySelector('h3');
+            const name = nameElement?.textContent?.toLowerCase() || '';
+            
+            const isVisible = value === '' || name.includes(value);
+            card.style.display = isVisible ? '' : 'none';
           });
         } catch (error) {
           console.error('Error al buscar recompensas:', error);
