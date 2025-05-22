@@ -1,0 +1,34 @@
+---
+import { SOCIAL_LINKS } from '../consts'
+
+const {
+  showText = true,
+  className = 'flex flex-wrap justify-center gap-4 sm:gap-6',
+  iconClassName = 'w-6 h-6 mr-2',
+  textClassName = 'text-xl sm:text-2xl hover:text-blue-500 transition-colors'
+} = Astro.props
+
+const socialLinks = SOCIAL_LINKS
+---
+
+<div class={className}>
+  {
+    socialLinks.map((link) => (
+      <a
+        href={link.href}
+        class={`flex items-center ${textClassName}`}
+        target='_blank'
+        rel='noopener noreferrer'
+        aria-label={link.text}
+      >
+        <img
+          src={link.svg}
+          alt={link.text}
+          class={iconClassName}
+        />
+        {showText && <span>{link.text}</span>}
+      </a>
+    ))
+  }
+</div>
+

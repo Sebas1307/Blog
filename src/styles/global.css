@@ -177,3 +177,14 @@ button.bg-blue-400 {
   color: #fff !important;
   border-color: #20ecaa !important;
 }
+
+/* Color personalizado para la selección de texto */
+::selection {
+  background: #20ecaa;
+  color: #fff;
+}
+
+::-moz-selection {
+  background: #20ecaa;
+  color: #fff;
+}

@@ -1,11 +1,11 @@
 ---
 import MainLayout from '../layouts/MainLayout.astro'
-const nacimiento = new Date('2004-07-13');
-const hoy = new Date();
-let edad = hoy.getFullYear() - nacimiento.getFullYear();
-const mes = hoy.getMonth() - nacimiento.getMonth();
+const nacimiento = new Date('2004-07-13')
+const hoy = new Date()
+let edad = hoy.getFullYear() - nacimiento.getFullYear()
+const mes = hoy.getMonth() - nacimiento.getMonth()
 if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) {
-  edad--;
+  edad--
 }
 ---
 
@@ -48,14 +48,13 @@ if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) {
         que aprendo a través de videos.
       </p>
       <p>
-        Desde finales de 2024, he profundizado en el mundo de las finanzas y la
-        inversión, comenzando con plataformas como Tyba y evolucionando hacia
-        herramientas más avanzadas como Hapi e Interactive Brokers. En paralelo,
-        exploro el ecosistema cripto a través de plataformas como Binance,
-        Kraken y Phantom, y actualmente estoy aprendiendo a desarrollar tokens
-        en Solana, integrando conceptos de blockchain en mis proyectos
-        personales. Hoy combino mi carrera como desarrollador con una formación
-        disciplinada en inversión y tecnología descentralizada.
+        Desde finales de 2024, he profundizado en el mundo de las finanzas e
+        inversión, desarrollando un enfoque estructurado y de largo plazo. En
+        paralelo, exploro el ecosistema cripto y estudio activamente el
+        desarrollo de tokens y aplicaciones sobre blockchain, integrando estos
+        conceptos en proyectos personales con visión tecnológica y financiera.
+        Hoy combino mi carrera como desarrollador con una formación disciplinada
+        en inversión y tecnologías descentralizadas.
       </p>
     </div>
   </div>

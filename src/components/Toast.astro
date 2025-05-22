@@ -1,0 +1,35 @@
+---
+interface Props {
+  message: string;
+  type?: 'success' | 'error' | 'info';
+}
+
+const { message, type = 'success' } = Astro.props;
+
+const bgColor = {
+  success: 'bg-[#20ecaa]',
+  error: 'bg-red-500',
+  info: 'bg-blue-500'
+}[type];
+---
+
+<div id="toast" class={`fixed bottom-4 right-4 ${bgColor} text-white px-6 py-3 rounded-lg shadow-lg transform translate-y-full opacity-0 transition-all duration-300`}>
+  {message}
+</div>
+
+<script>
+  function showToast(message: string, type: 'success' | 'error' | 'info' = 'success') {
+    const toast = document.getElementById('toast');
+    if (!toast) return;
+
+    toast.textContent = message;
+    toast.classList.remove('translate-y-full', 'opacity-0');
+    
+    setTimeout(() => {
+      toast.classList.add('translate-y-full', 'opacity-0');
+    }, 3000);
+  }
+
+  // Exponer la función globalmente
+  window.showToast = showToast;
+</script> 

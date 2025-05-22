@@ -62,85 +62,98 @@ const videos = TIKTOK_VIDEOS
     </section>
   </main>
   <script>
-    let selectedCategories: string[] = ['Todos']
-    let searchText = ''
-    const videos = Array.from(
-      document.querySelectorAll('#videos-container > article')
-    ) as HTMLElement[]
-    const buttons = Array.from(
-      document.querySelectorAll('#category-buttons button')
-    ) as HTMLElement[]
-    const searchInput = document.querySelector(
-      'input[type="search"]'
-    ) as HTMLInputElement
+    function initializeFilters() {
+      let selectedCategories: string[] = ['Todos']
+      let searchText = ''
+      const videos = Array.from(
+        document.querySelectorAll('#videos-container > article')
+      ) as HTMLElement[]
+      const buttons = Array.from(
+        document.querySelectorAll('#category-buttons button')
+      ) as HTMLElement[]
+      const searchInput = document.querySelector(
+        'input[type="search"]'
+      ) as HTMLInputElement
 
-    // Seleccionar "Todos" por defecto
-    const todosButton = buttons.find(btn => btn.dataset.category === 'Todos')
-    if (todosButton) {
-      todosButton.classList.add('bg-blue-400', 'text-white')
-      todosButton.classList.remove('bg-white', 'text-gray-900')
-    }
-
-    function filtrarVideos() {
-      videos.forEach((video) => {
-        const videoCategories = (video.dataset.category || '').split(',')
-        const titulo =
-          video.querySelector('p')?.textContent?.toLowerCase() || ''
-        
-        // Filtrar por categoría
-        const mostrarCategoria =
-          selectedCategories.includes('Todos') ||
-          selectedCategories.some((cat) => videoCategories.includes(cat))
-        
-        // Filtrar por texto
-        const mostrarTexto =
-          searchText.trim() === '' ||
-          titulo.includes(searchText.trim().toLowerCase())
-        
-        // Mostrar solo si cumple ambos filtros
-        video.style.display =
-          mostrarCategoria && mostrarTexto ? 'block' : 'none'
-      })
-    }
-
-    if (searchInput) {
-      searchInput.addEventListener('input', (e) => {
-        searchText = searchInput.value
-        filtrarVideos()
-      })
-    }
-
-    buttons.forEach((button) => {
-      button.addEventListener('click', () => {
-        const cat = button.dataset.category
-        if (!cat) return
-
-        // Si ya está seleccionado, no hacer nada
-        if (button.classList.contains('bg-blue-400')) {
-          return
-        }
-
-        // Deseleccionar el botón actual y seleccionar el nuevo
-        buttons.forEach((btn) => {
-          btn.classList.remove('bg-blue-400', 'text-white')
-          btn.classList.add('bg-white', 'text-gray-900')
-        })
-        selectedCategories = [cat]
-        button.classList.add('bg-blue-400', 'text-white')
-        button.classList.remove('bg-white', 'text-gray-900')
-
-        filtrarVideos()
-      })
-    })
-
-    // Siempre aseguramos que los botones tengan color de texto
-    buttons.forEach((button) => {
-      if (!button.classList.contains('bg-blue-500')) {
-        button.classList.add('text-gray-900')
+      // Seleccionar "Todos" por defecto
+      const todosButton = buttons.find(btn => btn.dataset.category === 'Todos')
+      if (todosButton) {
+        todosButton.classList.add('bg-blue-400', 'text-white')
+        todosButton.classList.remove('bg-white', 'text-gray-900')
       }
-    })
 
-    // Mostrar todos los videos al inicio
-    filtrarVideos()
+      function filtrarVideos() {
+        videos.forEach((video) => {
+          try {
+            const videoCategories = (video.dataset.category || '').split(',').map(cat => cat.trim())
+            const titulo = video.querySelector('h6')?.textContent?.toLowerCase() || ''
+            
+            // Filtrar por categoría
+            const mostrarCategoria =
+              selectedCategories.includes('Todos') ||
+              videoCategories.some(cat => selectedCategories.includes(cat))
+            
+            // Filtrar por texto
+            const mostrarTexto =
+              !searchText.trim() ||
+              titulo.includes(searchText.trim().toLowerCase())
+            
+            // Mostrar solo si cumple ambos filtros
+            video.style.display =
+              mostrarCategoria && mostrarTexto ? 'block' : 'none'
+          } catch (error) {
+            console.error('Error al filtrar video:', error)
+            // En caso de error, mostrar el video
+            video.style.display = 'block'
+          }
+        })
+      }
+
+      if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+          searchText = (e.target as HTMLInputElement).value
+          filtrarVideos()
+        })
+      }
+
+      buttons.forEach((button) => {
+        button.addEventListener('click', () => {
+          const cat = button.dataset.category
+          if (!cat) return
+
+          // Si ya está seleccionado, no hacer nada
+          if (button.classList.contains('bg-blue-400')) {
+            return
+          }
+
+          // Deseleccionar el botón actual y seleccionar el nuevo
+          buttons.forEach((btn) => {
+            btn.classList.remove('bg-blue-400', 'text-white')
+            btn.classList.add('bg-white', 'text-gray-900')
+          })
+          selectedCategories = [cat]
+          button.classList.add('bg-blue-400', 'text-white')
+          button.classList.remove('bg-white', 'text-gray-900')
+
+          filtrarVideos()
+        })
+      })
+
+      // Siempre aseguramos que los botones tengan color de texto
+      buttons.forEach((button) => {
+        if (!button.classList.contains('bg-blue-500')) {
+          button.classList.add('text-gray-900')
+        }
+      })
+
+      // Mostrar todos los videos al inicio
+      filtrarVideos()
+    }
+
+    // Inicializar cuando el DOM esté listo
+    document.addEventListener('DOMContentLoaded', initializeFilters);
+
+    // Reinicializar después de la navegación de Astro
+    document.addEventListener('astro:after-swap', initializeFilters);
   </script>
 </MainLayout>
