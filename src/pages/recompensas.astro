@@ -88,10 +88,12 @@ const rewardCodes = [
           cards.forEach(card => {
             if (!(card instanceof HTMLElement)) return;
             
-            const nameElement = card.querySelector('h3');
-            const name = nameElement?.textContent?.toLowerCase() || '';
+            // Buscar en todos los elementos de texto relevantes dentro de la tarjeta
+            const cardText = card.textContent?.toLowerCase() || '';
+            const isVisible = value === '' || cardText.includes(value);
             
-            const isVisible = value === '' || name.includes(value);
+            // Aplicar la visibilidad con una transición suave
+            card.style.opacity = isVisible ? '1' : '0';
             card.style.display = isVisible ? '' : 'none';
           });
         } catch (error) {
@@ -99,6 +101,7 @@ const rewardCodes = [
           // En caso de error, mostrar todas las tarjetas
           cards.forEach(card => {
             if (card instanceof HTMLElement) {
+              card.style.opacity = '1';
               card.style.display = '';
             }
           });
@@ -107,9 +110,21 @@ const rewardCodes = [
     }
   }
 
-  // Inicializar cuando el DOM esté listo
-  document.addEventListener('DOMContentLoaded', initializeSearch);
+  // Función para asegurar que la inicialización se realice
+  function setupSearch() {
+    // Intentar inicializar inmediatamente
+    initializeSearch();
 
-  // Reinicializar después de la navegación de Astro
-  document.addEventListener('astro:after-swap', initializeSearch);
+    // También inicializar cuando el DOM esté listo
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeSearch);
+    }
+
+    // Inicializar después de la navegación de Astro
+    document.addEventListener('astro:after-swap', initializeSearch);
+    document.addEventListener('astro:page-load', initializeSearch);
+  }
+
+  // Iniciar la configuración
+  setupSearch();
 </script>
