@@ -28,17 +28,17 @@ const allCategories = Array.from(
   )
 )
 const categories = ['Todos', ...new Set([...categoriasBase, ...allCategories])]
-
-// Debug: Mostrar las categorías disponibles
-console.log('Categorías disponibles:', categories)
 ---
 
-<MainLayout>
+<MainLayout
+  title='Sebastian Patiño Caro | Artículos'
+  description='Artículos sobre finanzas, inversiones y blockchain. Aprende sobre educación financiera, criptomonedas y estrategias de inversión con contenido práctico y actualizado.'
+>
   <main class='container mx-auto px-4 py-8'>
     <FilterableContent
       categories={categories}
-      containerId="posts-container"
-      searchPlaceholder="Buscar artículos..."
+      containerId='posts-container'
+      searchPlaceholder='Buscar artículos...'
     >
       {
         posts.map((post) => {
@@ -81,7 +81,9 @@ console.log('Categorías disponibles:', categories)
       ) as HTMLInputElement
 
       // Seleccionar "Todos" por defecto
-      const todosButton = buttons.find((btn) => btn.dataset.category === 'Todos')
+      const todosButton = buttons.find(
+        (btn) => btn.dataset.category === 'Todos'
+      )
       if (todosButton) {
         todosButton.classList.add('bg-blue-400', 'text-white')
         todosButton.classList.remove('bg-white', 'text-gray-900')
@@ -91,18 +93,19 @@ console.log('Categorías disponibles:', categories)
         posts.forEach((post) => {
           try {
             const postCategories = JSON.parse(post.dataset.categories || '[]')
-            const titulo = post.querySelector('h6')?.textContent?.toLowerCase() || ''
-            
+            const titulo =
+              post.querySelector('h6')?.textContent?.toLowerCase() || ''
+
             // Filtrar por categoría
             const mostrarCategoria =
               selectedCategories.includes('Todos') ||
               selectedCategories.some((cat) => postCategories.includes(cat))
-            
+
             // Filtrar por texto
             const mostrarTexto =
               !searchText.trim() ||
               titulo.includes(searchText.trim().toLowerCase())
-            
+
             // Mostrar solo si cumple ambos filtros
             post.style.display =
               mostrarCategoria && mostrarTexto ? 'block' : 'none'
@@ -128,18 +131,20 @@ console.log('Categorías disponibles:', categories)
       buttons.forEach((button) => {
         const newButton = button.cloneNode(true) as HTMLElement
         button.parentNode?.replaceChild(newButton, button)
-        
+
         // Asegurar que el botón tenga los estilos base
         newButton.classList.remove('bg-blue-400', 'text-white')
         newButton.classList.add('bg-white', 'text-gray-900')
-        
+
         newButton.addEventListener('click', () => {
           const cat = newButton.dataset.category
           if (!cat) return
 
           // Deseleccionar todos los botones
           buttons.forEach((btn) => {
-            const currentBtn = document.querySelector(`[data-category="${btn.dataset.category}"]`) as HTMLElement
+            const currentBtn = document.querySelector(
+              `[data-category="${btn.dataset.category}"]`
+            ) as HTMLElement
             if (currentBtn) {
               currentBtn.classList.remove('bg-blue-400', 'text-white')
               currentBtn.classList.add('bg-white', 'text-gray-900')
@@ -156,7 +161,9 @@ console.log('Categorías disponibles:', categories)
       })
 
       // Asegurar que el botón "Todos" esté seleccionado inicialmente
-      const initialTodosButton = document.querySelector('[data-category="Todos"]') as HTMLElement
+      const initialTodosButton = document.querySelector(
+        '[data-category="Todos"]'
+      ) as HTMLElement
       if (initialTodosButton) {
         initialTodosButton.classList.remove('bg-white', 'text-gray-900')
         initialTodosButton.classList.add('bg-blue-400', 'text-white')

@@ -15,7 +15,7 @@ interface Props {
 
 const {
   title = 'Sebastian Patiño | Blog',
-  description,
+  description = 'Blog personal sobre finanzas, inversiones y blockchain. Aprende sobre educación financiera, criptomonedas y estrategias de inversión con contenido práctico y actualizado.',
   pubDate,
   heroImage
 } = Astro.props
@@ -25,7 +25,9 @@ const {
   <head>
     <BaseHead
       title={title}
-      description={description ?? ''}
+      description={description}
+      image={heroImage}
+      pubDate={pubDate}
     />
     <ClientRouter transition:animate="fade" />
   </head>
@@ -44,8 +46,9 @@ const {
             <div class='hero-image mb-8' transition:animate="fade">
               <img
                 src={heroImage}
-                alt=''
+                alt={`Imagen destacada para ${title}`}
                 class='w-[400px] h-[400px] rounded-lg'
+                loading="lazy"
               />
             </div>
           )
