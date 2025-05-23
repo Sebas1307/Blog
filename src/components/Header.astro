@@ -1,4 +1,6 @@
 ---
+import MobileMenu from './MobileMenu';
+
 const navItems = [
   { href: '/', text: 'Inicio' },
   { href: '/blog', text: 'Blog' },
@@ -54,113 +56,11 @@ const currentPath = Astro.url.pathname;
         >
           Agendar reunión
         </a>
-        <button
-          class='md:hidden ml-2 p-2 rounded bg-white shadow border border-gray-200 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400'
-          id='menu-button'
-          aria-label='Menú'
-        >
-          <svg
-            class='w-7 h-7'
-            fill='none'
-            stroke='currentColor'
-            viewBox='0 0 24 24'
-          >
-            <path
-              stroke-linecap='round'
-              stroke-linejoin='round'
-              stroke-width='2'
-              d='M4 6h16M4 12h16M4 18h16'
-            >
-            </path>
-          </svg>
-        </button>
-      </div>
-    </div>
-
-    <!-- Menú Móvil -->
-    <div
-      class='md:hidden hidden fixed inset-0 bg-white z-[9999] transition-all duration-300'
-      id='mobile-menu'
-    >
-      <div
-        class='flex flex-col space-y-6 mt-20 px-6 py-8'
-      >
-        {/* Botón cerrar */}
-        <button
-          id='close-menu'
-          class='absolute top-4 right-4 p-2 rounded-full hover:bg-gray-200 focus:outline-none'
-          aria-label='Cerrar menú'
-        >
-          <svg
-            xmlns='http://www.w3.org/2000/svg'
-            fill='none'
-            viewBox='0 0 24 24'
-            stroke='currentColor'
-            class='w-7 h-7 text-gray-700'
-          >
-            <path
-              stroke-linecap='round'
-              stroke-linejoin='round'
-              stroke-width='2'
-              d='M6 18L18 6M6 6l12 12'
-            >
-            </path>
-          </svg>
-        </button>
-        {/* Enlaces */}
-        {
-          navItems.map((item) => (
-            <a
-              href={item.href}
-              class={`text-gray-700 hover:text-[#20ecaa] transition-colors text-lg font-medium ${
-                currentPath === item.href ? 'text-[#20ecaa]' : ''
-              }`}
-            >
-              {item.text}
-            </a>
-          ))
-        }
-        <a
-          href='/about'
-          class='text-gray-700 hover:text-[#20ecaa] transition-colors text-lg font-medium'
-        >
-          Sobre mí
-        </a>
-        <a
-          href="/agendar"
-          class="mt-4 px-4 py-2 rounded bg-[#20ecaa] text-white font-semibold shadow hover:bg-[#1bc99a] transition-colors text-base text-center"
-        >
-          Agendar reunión
-        </a>
+        <MobileMenu client:load navItems={navItems} currentPath={currentPath} />
       </div>
     </div>
   </nav>
 </header>
-
-<script>
-  const menuButton = document.getElementById('menu-button')
-  const mobileMenu = document.getElementById('mobile-menu')
-  const header = document.querySelector('.header')
-  const closeMenu = document.getElementById('close-menu')
-
-  menuButton?.addEventListener('click', () => {
-    mobileMenu?.classList.toggle('hidden')
-    document.body.classList.toggle('overflow-hidden')
-  })
-
-  closeMenu?.addEventListener('click', () => {
-    mobileMenu?.classList.add('hidden')
-    document.body.classList.remove('overflow-hidden')
-  })
-
-  window.addEventListener('scroll', () => {
-    if (window.scrollY > 50) {
-      header?.classList.add('scrolled')
-    } else {
-      header?.classList.remove('scrolled')
-    }
-  })
-</script>
 
 <style>
   .header {
