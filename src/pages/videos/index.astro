@@ -2,17 +2,26 @@
 import TikTokVideo from '../../components/TikTokVideo.astro'
 import { TIKTOK_VIDEOS } from '../../constants/tiktok-videos'
 import MainLayout from '../../layouts/MainLayout.astro'
-const categories = ['Todos', 'Blockchain', 'Finanzas', 'Inversiones']
+
+// Definir las categorías base y obtener las categorías únicas de los videos
+const categoriasBase = ['Finanzas', 'Inversiones', 'Blockchain']
+const allCategories = Array.from(
+  new Set(
+    TIKTOK_VIDEOS.flatMap((video) => {
+      const categories = video.category || []
+      return Array.isArray(categories) ? categories : [categories]
+    })
+  )
+)
+const categories = ['Todos', ...new Set([...categoriasBase, ...allCategories])]
 
 // Definir los videos de TikTok
 const videos = TIKTOK_VIDEOS
 ---
 
 <MainLayout>
-  <main class='container mx-auto px-4 py-8 my-2'>
-    <h1 class='text-4xl font-bold mb-8'>Videos</h1>
-
-    <!-- Filtros de Categoría -->
+  <main class='container mx-auto px-4 py-8'>
+    <!-- Filtros -->
     <section class='mb-8'>
       <div class='flex flex-wrap gap-4 items-center'>
         <h2 class='text-xl font-semibold'>Filtrar por categoría:</h2>
@@ -40,33 +49,46 @@ const videos = TIKTOK_VIDEOS
         <input
           type='search'
           placeholder='Buscar videos...'
-          class='w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2'
+          class='w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500'
         />
       </div>
     </section>
 
     <!-- Lista de Videos -->
     <section
-      class='grid grid-cols-1 md:grid-cols-[1fr_1fr]'
+      class='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-8'
       id='videos-container'
     >
       {
-        videos.map((video) => (
-          <TikTokVideo
-            url={video.url}
-            title={video.title}
-            category={video.category}
-          />
-        ))
+        videos.map((video) => {
+          const categories = video.category || []
+          const categoryArray = Array.isArray(categories)
+            ? categories
+            : [categories]
+          return (
+            <div
+              data-categories={JSON.stringify(categoryArray)}
+              class='mb-8'
+            >
+              <TikTokVideo
+                url={video.url}
+                title={video.title}
+                category={categoryArray}
+              />
+            </div>
+          )
+        })
       }
     </section>
   </main>
+
   <script>
+    // Función para inicializar los filtros
     function initializeFilters() {
       let selectedCategories: string[] = ['Todos']
       let searchText = ''
       const videos = Array.from(
-        document.querySelectorAll('#videos-container > article')
+        document.querySelectorAll('#videos-container > div')
       ) as HTMLElement[]
       const buttons = Array.from(
         document.querySelectorAll('#category-buttons button')
@@ -76,7 +98,7 @@ const videos = TIKTOK_VIDEOS
       ) as HTMLInputElement
 
       // Seleccionar "Todos" por defecto
-      const todosButton = buttons.find(btn => btn.dataset.category === 'Todos')
+      const todosButton = buttons.find((btn) => btn.dataset.category === 'Todos')
       if (todosButton) {
         todosButton.classList.add('bg-blue-400', 'text-white')
         todosButton.classList.remove('bg-white', 'text-gray-900')
@@ -85,13 +107,13 @@ const videos = TIKTOK_VIDEOS
       function filtrarVideos() {
         videos.forEach((video) => {
           try {
-            const videoCategories = (video.dataset.category || '').split(',').map(cat => cat.trim())
+            const videoCategories = JSON.parse(video.dataset.categories || '[]')
             const titulo = video.querySelector('h6')?.textContent?.toLowerCase() || ''
             
             // Filtrar por categoría
             const mostrarCategoria =
               selectedCategories.includes('Todos') ||
-              videoCategories.some(cat => selectedCategories.includes(cat))
+              selectedCategories.some((cat) => videoCategories.includes(cat))
             
             // Filtrar por texto
             const mostrarTexto =
@@ -109,51 +131,75 @@ const videos = TIKTOK_VIDEOS
         })
       }
 
+      // Limpiar eventos anteriores
       if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
+        const newSearchInput = searchInput.cloneNode(true) as HTMLInputElement
+        searchInput.parentNode?.replaceChild(newSearchInput, searchInput)
+        newSearchInput.addEventListener('input', (e) => {
           searchText = (e.target as HTMLInputElement).value
           filtrarVideos()
         })
       }
 
+      // Limpiar y reasignar eventos de los botones
       buttons.forEach((button) => {
-        button.addEventListener('click', () => {
-          const cat = button.dataset.category
+        const newButton = button.cloneNode(true) as HTMLElement
+        button.parentNode?.replaceChild(newButton, button)
+        
+        // Asegurar que el botón tenga los estilos base
+        newButton.classList.remove('bg-blue-400', 'text-white')
+        newButton.classList.add('bg-white', 'text-gray-900')
+        
+        newButton.addEventListener('click', () => {
+          const cat = newButton.dataset.category
           if (!cat) return
 
-          // Si ya está seleccionado, no hacer nada
-          if (button.classList.contains('bg-blue-400')) {
-            return
-          }
-
-          // Deseleccionar el botón actual y seleccionar el nuevo
+          // Deseleccionar todos los botones
           buttons.forEach((btn) => {
-            btn.classList.remove('bg-blue-400', 'text-white')
-            btn.classList.add('bg-white', 'text-gray-900')
+            const currentBtn = document.querySelector(`[data-category="${btn.dataset.category}"]`) as HTMLElement
+            if (currentBtn) {
+              currentBtn.classList.remove('bg-blue-400', 'text-white')
+              currentBtn.classList.add('bg-white', 'text-gray-900')
+            }
           })
+
+          // Seleccionar el botón actual
           selectedCategories = [cat]
-          button.classList.add('bg-blue-400', 'text-white')
-          button.classList.remove('bg-white', 'text-gray-900')
+          newButton.classList.remove('bg-white', 'text-gray-900')
+          newButton.classList.add('bg-blue-400', 'text-white')
 
           filtrarVideos()
         })
       })
 
-      // Siempre aseguramos que los botones tengan color de texto
-      buttons.forEach((button) => {
-        if (!button.classList.contains('bg-blue-500')) {
-          button.classList.add('text-gray-900')
-        }
-      })
+      // Asegurar que el botón "Todos" esté seleccionado inicialmente
+      const initialTodosButton = document.querySelector('[data-category="Todos"]') as HTMLElement
+      if (initialTodosButton) {
+        initialTodosButton.classList.remove('bg-white', 'text-gray-900')
+        initialTodosButton.classList.add('bg-blue-400', 'text-white')
+      }
 
       // Mostrar todos los videos al inicio
       filtrarVideos()
     }
 
-    // Inicializar cuando el DOM esté listo
-    document.addEventListener('DOMContentLoaded', initializeFilters);
+    // Función para manejar la inicialización
+    function setupFilters() {
+      // Inicializar cuando el DOM esté listo
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeFilters)
+      } else {
+        initializeFilters()
+      }
 
-    // Reinicializar después de la navegación de Astro
-    document.addEventListener('astro:after-swap', initializeFilters);
+      // Reinicializar después de la navegación de Astro
+      document.addEventListener('astro:after-swap', () => {
+        // Pequeño delay para asegurar que el DOM esté actualizado
+        setTimeout(initializeFilters, 0)
+      })
+    }
+
+    // Iniciar la configuración
+    setupFilters()
   </script>
 </MainLayout>

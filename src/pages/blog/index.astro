@@ -98,6 +98,7 @@ console.log('Categorías disponibles:', categories)
   </main>
 
   <script>
+    // Función para inicializar los filtros
     function initializeFilters() {
       let selectedCategories: string[] = ['Todos']
       let searchText = ''
@@ -145,51 +146,75 @@ console.log('Categorías disponibles:', categories)
         })
       }
 
+      // Limpiar eventos anteriores
       if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
+        const newSearchInput = searchInput.cloneNode(true) as HTMLInputElement
+        searchInput.parentNode?.replaceChild(newSearchInput, searchInput)
+        newSearchInput.addEventListener('input', (e) => {
           searchText = (e.target as HTMLInputElement).value
           filtrarPosts()
         })
       }
 
+      // Limpiar y reasignar eventos de los botones
       buttons.forEach((button) => {
-        button.addEventListener('click', () => {
-          const cat = button.dataset.category
+        const newButton = button.cloneNode(true) as HTMLElement
+        button.parentNode?.replaceChild(newButton, button)
+        
+        // Asegurar que el botón tenga los estilos base
+        newButton.classList.remove('bg-blue-400', 'text-white')
+        newButton.classList.add('bg-white', 'text-gray-900')
+        
+        newButton.addEventListener('click', () => {
+          const cat = newButton.dataset.category
           if (!cat) return
 
-          // Si ya está seleccionado, no hacer nada
-          if (button.classList.contains('bg-blue-400')) {
-            return
-          }
-
-          // Deseleccionar el botón actual y seleccionar el nuevo
+          // Deseleccionar todos los botones
           buttons.forEach((btn) => {
-            btn.classList.remove('bg-blue-400', 'text-white')
-            btn.classList.add('bg-white', 'text-gray-900')
+            const currentBtn = document.querySelector(`[data-category="${btn.dataset.category}"]`) as HTMLElement
+            if (currentBtn) {
+              currentBtn.classList.remove('bg-blue-400', 'text-white')
+              currentBtn.classList.add('bg-white', 'text-gray-900')
+            }
           })
+
+          // Seleccionar el botón actual
           selectedCategories = [cat]
-          button.classList.add('bg-blue-400', 'text-white')
-          button.classList.remove('bg-white', 'text-gray-900')
+          newButton.classList.remove('bg-white', 'text-gray-900')
+          newButton.classList.add('bg-blue-400', 'text-white')
 
           filtrarPosts()
         })
       })
 
-      // Siempre aseguramos que los botones tengan color de texto
-      buttons.forEach((button) => {
-        if (!button.classList.contains('bg-blue-500')) {
-          button.classList.add('text-gray-900')
-        }
-      })
+      // Asegurar que el botón "Todos" esté seleccionado inicialmente
+      const initialTodosButton = document.querySelector('[data-category="Todos"]') as HTMLElement
+      if (initialTodosButton) {
+        initialTodosButton.classList.remove('bg-white', 'text-gray-900')
+        initialTodosButton.classList.add('bg-blue-400', 'text-white')
+      }
 
       // Mostrar todos los posts al inicio
       filtrarPosts()
     }
 
-    // Inicializar cuando el DOM esté listo
-    document.addEventListener('DOMContentLoaded', initializeFilters);
+    // Función para manejar la inicialización
+    function setupFilters() {
+      // Inicializar cuando el DOM esté listo
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeFilters)
+      } else {
+        initializeFilters()
+      }
 
-    // Reinicializar después de la navegación de Astro
-    document.addEventListener('astro:after-swap', initializeFilters);
+      // Reinicializar después de la navegación de Astro
+      document.addEventListener('astro:after-swap', () => {
+        // Pequeño delay para asegurar que el DOM esté actualizado
+        setTimeout(initializeFilters, 0)
+      })
+    }
+
+    // Iniciar la configuración
+    setupFilters()
   </script>
 </MainLayout>
