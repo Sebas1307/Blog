@@ -1,34 +1,38 @@
 ---
 interface Props {
-  categories: string[];
-  containerId: string;
-  searchPlaceholder: string;
+  categories?: string[]
+  containerId: string
+  searchPlaceholder: string
 }
 
-const { categories, containerId, searchPlaceholder } = Astro.props;
+const { categories = [], containerId, searchPlaceholder } = Astro.props
 ---
 
 <!-- Filtros -->
-<section class='mb-8'>
-  <div class='flex flex-wrap gap-4 items-center'>
-    <h2 class='text-xl font-semibold'>Filtrar por categoría:</h2>
-    <div
-      class='flex flex-wrap gap-2'
-      id='category-buttons'
-    >
-      {
-        categories.map((category) => (
-          <button
-            class='px-4 py-2 bg-white text-gray-900 rounded-full shadow-sm hover:bg-gray-100 transition-colors cursor-pointer'
-            data-category={category}
-          >
-            {category}
-          </button>
-        ))
-      }
-    </div>
-  </div>
-</section>
+{
+  categories.length > 0 && (
+    <section class='mb-8'>
+      <div class='flex flex-wrap gap-4 items-center'>
+        <h2 class='text-xl font-semibold'>Filtrar por categoría:</h2>
+        <div
+          class='flex flex-wrap gap-2'
+          id='category-buttons'
+        >
+          {
+            categories.map((category) => (
+              <button
+                class='px-4 py-2 bg-white text-gray-900 rounded-full shadow-sm hover:bg-gray-100 transition-colors cursor-pointer'
+                data-category={category}
+              >
+                {category}
+              </button>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+  )
+}
 
 <!-- Buscador -->
 <section class='mb-8'>
@@ -36,7 +40,7 @@ const { categories, containerId, searchPlaceholder } = Astro.props;
     <input
       type='search'
       placeholder={searchPlaceholder}
-      class='w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500'
+      class='w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#20ecaa]'
     />
   </div>
 </section>
@@ -55,7 +59,9 @@ const { categories, containerId, searchPlaceholder } = Astro.props;
     let selectedCategories = ['Todos']
     let searchText = ''
     const container = document.querySelector('[data-container-id]')
-    const items = container ? Array.from(container.children) as HTMLElement[] : []
+    const items = container
+      ? (Array.from(container.children) as HTMLElement[])
+      : []
     const buttons = Array.from(
       document.querySelectorAll('#category-buttons button')
     ) as HTMLElement[]
@@ -63,60 +69,69 @@ const { categories, containerId, searchPlaceholder } = Astro.props;
       'input[type="search"]'
     ) as HTMLInputElement
 
-    // Limpiar y reasignar eventos de los botones
-    buttons.forEach((button) => {
-      const newButton = button.cloneNode(true) as HTMLElement
-      button.parentNode?.replaceChild(newButton, button)
-      
-      // Asegurar que el botón tenga los estilos base
-      newButton.classList.remove('bg-blue-400', 'text-white')
-      newButton.classList.add('bg-white', 'text-gray-900')
-      
-      newButton.addEventListener('click', () => {
-        const cat = newButton.dataset.category
-        if (!cat) return
+    // Solo inicializar los botones de categoría si existen
+    if (buttons.length > 0) {
+      // Limpiar y reasignar eventos de los botones
+      buttons.forEach((button) => {
+        const newButton = button.cloneNode(true) as HTMLElement
+        button.parentNode?.replaceChild(newButton, button)
 
-        // Deseleccionar todos los botones
-        buttons.forEach((btn) => {
-          const currentBtn = document.querySelector(`[data-category="${btn.dataset.category}"]`) as HTMLElement
-          if (currentBtn) {
-            currentBtn.classList.remove('bg-blue-400', 'text-white')
-            currentBtn.classList.add('bg-white', 'text-gray-900')
-          }
+        // Asegurar que el botón tenga los estilos base
+        newButton.classList.remove('bg-blue-400', 'text-white')
+        newButton.classList.add('bg-white', 'text-gray-900')
+
+        newButton.addEventListener('click', () => {
+          const cat = newButton.dataset.category
+          if (!cat) return
+
+          // Deseleccionar todos los botones
+          buttons.forEach((btn) => {
+            const currentBtn = document.querySelector(
+              `[data-category="${btn.dataset.category}"]`
+            ) as HTMLElement
+            if (currentBtn) {
+              currentBtn.classList.remove('bg-blue-400', 'text-white')
+              currentBtn.classList.add('bg-white', 'text-gray-900')
+            }
+          })
+
+          // Seleccionar el botón actual
+          selectedCategories = [cat]
+          newButton.classList.remove('bg-white', 'text-gray-900')
+          newButton.classList.add('bg-blue-400', 'text-white')
+
+          filtrarItems()
         })
-
-        // Seleccionar el botón actual
-        selectedCategories = [cat]
-        newButton.classList.remove('bg-white', 'text-gray-900')
-        newButton.classList.add('bg-blue-400', 'text-white')
-
-        filtrarItems()
       })
-    })
 
-    // Asegurar que el botón "Todos" esté seleccionado inicialmente
-    const initialTodosButton = document.querySelector('[data-category="Todos"]') as HTMLElement
-    if (initialTodosButton) {
-      initialTodosButton.classList.remove('bg-white', 'text-gray-900')
-      initialTodosButton.classList.add('bg-blue-400', 'text-white')
+      // Asegurar que el botón "Todos" esté seleccionado inicialmente
+      const initialTodosButton = document.querySelector(
+        '[data-category="Todos"]'
+      ) as HTMLElement
+      if (initialTodosButton) {
+        initialTodosButton.classList.remove('bg-white', 'text-gray-900')
+        initialTodosButton.classList.add('bg-blue-400', 'text-white')
+      }
     }
 
     function filtrarItems() {
       items.forEach((item) => {
         try {
           const itemCategories = JSON.parse(item.dataset.categories || '[]')
-          const titulo = item.querySelector('article h6')?.textContent?.toLowerCase() || ''
-          
-          // Filtrar por categoría
+          const titulo =
+            item.querySelector('article h6')?.textContent?.toLowerCase() || ''
+
+          // Filtrar por categoría solo si hay categorías seleccionadas
           const mostrarCategoria =
+            buttons.length === 0 ||
             selectedCategories.includes('Todos') ||
             selectedCategories.some((cat) => itemCategories.includes(cat))
-          
+
           // Filtrar por texto
           const mostrarTexto =
             !searchText.trim() ||
             titulo.includes(searchText.trim().toLowerCase())
-          
+
           // Mostrar solo si cumple ambos filtros
           item.style.display =
             mostrarCategoria && mostrarTexto ? 'block' : 'none'
@@ -169,4 +184,5 @@ const { categories, containerId, searchPlaceholder } = Astro.props;
 
   // También ejecutar setupFilters cuando el componente se actualice
   document.addEventListener('astro:after-swap', setupFilters)
-</script> 
+</script>
+
