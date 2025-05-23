@@ -8,11 +8,12 @@ interface Props {
 	title: string;
 	description: string;
 	image?: string;
+	pubDate?: Date;
 }
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 
-const { title, description, image = '/blog-placeholder-1.jpg' } = Astro.props;
+const { title, description, image = '/blog-placeholder-1.jpg', pubDate } = Astro.props;
 ---
 
 <!-- Global Metadata -->
@@ -39,6 +40,11 @@ const { title, description, image = '/blog-placeholder-1.jpg' } = Astro.props;
 <title>{title}</title>
 <meta name="title" content={title} />
 <meta name="description" content={description} />
+<meta name="author" content="Sebastian Patiño Caro" />
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+<meta name="language" content="Spanish" />
+<meta name="revisit-after" content="7 days" />
+<meta name="theme-color" content="#010000" />
 
 <!-- Open Graph / Facebook -->
 <meta property="og:type" content="website" />
@@ -46,6 +52,10 @@ const { title, description, image = '/blog-placeholder-1.jpg' } = Astro.props;
 <meta property="og:title" content={title} />
 <meta property="og:description" content={description} />
 <meta property="og:image" content={new URL(image, Astro.url)} />
+<meta property="og:site_name" content={SITE_TITLE} />
+<meta property="og:locale" content="es_ES" />
+<meta property="og:image:alt" content={`Imagen destacada para ${title}`} />
+{pubDate && <meta property="article:published_time" content={pubDate.toISOString()} />}
 
 <!-- Twitter -->
 <meta property="twitter:card" content="summary_large_image" />
@@ -53,3 +63,5 @@ const { title, description, image = '/blog-placeholder-1.jpg' } = Astro.props;
 <meta property="twitter:title" content={title} />
 <meta property="twitter:description" content={description} />
 <meta property="twitter:image" content={new URL(image, Astro.url)} />
+<meta property="twitter:creator" content="@sebastianpa138" />
+<meta property="twitter:image:alt" content={`Imagen destacada para ${title}`} />

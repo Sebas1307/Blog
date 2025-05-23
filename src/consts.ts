@@ -1,8 +1,8 @@
 // Place any global data in this file.
 // You can import this data from anywhere in your site by using the `import` keyword.
 
-export const SITE_TITLE = 'Astro Blog';
-export const SITE_DESCRIPTION = 'Welcome to my website!';
+export const SITE_TITLE = 'Sebastian Patiño Caro | Blog';
+export const SITE_DESCRIPTION = 'Blog personal sobre finanzas, inversiones y blockchain. Aprende sobre educación financiera, criptomonedas y estrategias de inversión con contenido práctico y actualizado.';
 export const SOCIAL_LINKS = [
    {
       id: 'tiktok',
