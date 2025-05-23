@@ -1,0 +1,19 @@
+User-agent: *
+Allow: /
+Sitemap: https://sebastianpatino-blog.netlify.app/sitemap-index.xml
+
+# Optimizar el rastreo
+Crawl-delay: 10
+
+# Permitir acceso a recursos importantes
+Allow: /blog/
+Allow: /videos/
+Allow: /roadmaps/
+Allow: /about/
+
+
+# Bloquear acceso a archivos innecesarios
+Disallow: /private/
+Disallow: /admin/
+Disallow: /*.json$
+Disallow: /*.xml$ 

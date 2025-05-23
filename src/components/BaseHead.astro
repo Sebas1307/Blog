@@ -45,6 +45,7 @@ const { title, description, image = '/blog-placeholder-1.jpg', pubDate } = Astro
 <meta name="language" content="Spanish" />
 <meta name="revisit-after" content="7 days" />
 <meta name="theme-color" content="#010000" />
+<meta name="keywords" content="finanzas, inversiones, blockchain, criptomonedas, educación financiera, trading, bitcoin, ethereum" />
 
 <!-- Open Graph / Facebook -->
 <meta property="og:type" content="website" />
@@ -65,3 +66,27 @@ const { title, description, image = '/blog-placeholder-1.jpg', pubDate } = Astro
 <meta property="twitter:image" content={new URL(image, Astro.url)} />
 <meta property="twitter:creator" content="@sebastianpa138" />
 <meta property="twitter:image:alt" content={`Imagen destacada para ${title}`} />
+
+<!-- Schema.org markup for Google -->
+<script type="application/ld+json">
+  {JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    "name": SITE_TITLE,
+    "url": Astro.url,
+    "author": {
+      "@type": "Person",
+      "name": "Sebastian Patiño Caro",
+      "url": "https://sebastianpatino-blog.netlify.app/about"
+    },
+    "description": description,
+    "publisher": {
+      "@type": "Person",
+      "name": "Sebastian Patiño Caro",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://sebastianpatino-blog.netlify.app/avatar.jpg"
+      }
+    }
+  })}
+</script>
