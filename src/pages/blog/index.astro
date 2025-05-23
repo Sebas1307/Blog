@@ -2,6 +2,7 @@
 import MainLayout from '../../layouts/MainLayout.astro'
 import { getCollection } from 'astro:content'
 import BlogPost from '../../components/BlogPost.astro'
+import FilterableContent from '../../components/FilterableContent.astro'
 
 const posts = (await getCollection('blog')).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
@@ -34,43 +35,10 @@ console.log('Categorías disponibles:', categories)
 
 <MainLayout>
   <main class='container mx-auto px-4 py-8'>
-    <!-- Filtros -->
-    <section class='mb-8'>
-      <div class='flex flex-wrap gap-4 items-center'>
-        <h2 class='text-xl font-semibold'>Filtrar por categoría:</h2>
-        <div
-          class='flex flex-wrap gap-2'
-          id='category-buttons'
-        >
-          {
-            categories.map((category) => (
-              <button
-                class='px-4 py-2 bg-white text-gray-900 rounded-full shadow-sm hover:bg-gray-100 transition-colors cursor-pointer'
-                data-category={category}
-              >
-                {category}
-              </button>
-            ))
-          }
-        </div>
-      </div>
-    </section>
-
-    <!-- Buscador -->
-    <section class='mb-8'>
-      <div class='max-w-xl'>
-        <input
-          type='search'
-          placeholder='Buscar artículos...'
-          class='w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500'
-        />
-      </div>
-    </section>
-
-    <!-- Lista de Posts -->
-    <section
-      class='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-8'
-      id='posts-container'
+    <FilterableContent
+      categories={categories}
+      containerId="posts-container"
+      searchPlaceholder="Buscar artículos..."
     >
       {
         posts.map((post) => {
@@ -94,7 +62,7 @@ console.log('Categorías disponibles:', categories)
           )
         })
       }
-    </section>
+    </FilterableContent>
   </main>
 
   <script>
