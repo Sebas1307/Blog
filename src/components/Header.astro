@@ -79,11 +79,11 @@ const currentPath = Astro.url.pathname;
 
     <!-- Menú Móvil -->
     <div
-      class='md:hidden hidden fixed inset-0 bg-white bg-opacity-100 z-[9999] shadow-lg transition-all duration-300'
+      class='md:hidden hidden fixed inset-0 bg-white z-[9999] transition-all duration-300'
       id='mobile-menu'
     >
       <div
-        class='flex flex-col space-y-8 mt-24 px-8 bg-white rounded-2xl py-8 relative'
+        class='flex flex-col space-y-6 mt-20 px-6 py-8'
       >
         {/* Botón cerrar */}
         <button
@@ -112,7 +112,7 @@ const currentPath = Astro.url.pathname;
           navItems.map((item) => (
             <a
               href={item.href}
-              class={`text-gray-700 hover:text-blue-600 transition-colors text-xl font-semibold px-6 ${
+              class={`text-gray-700 hover:text-[#20ecaa] transition-colors text-lg font-medium ${
                 currentPath === item.href ? 'text-[#20ecaa]' : ''
               }`}
             >
@@ -122,13 +122,13 @@ const currentPath = Astro.url.pathname;
         }
         <a
           href='/about'
-          class='text-gray-700 hover:text-blue-600 transition-colors text-xl font-semibold px-6'
+          class='text-gray-700 hover:text-[#20ecaa] transition-colors text-lg font-medium'
         >
           Sobre mí
         </a>
         <a
           href="/agendar"
-          class="ml-4 px-4 py-2 rounded bg-[#20ecaa] text-white font-semibold shadow hover:bg-[#1bc99a] transition-colors text-sm lg:text-base btn-agendar-movil whitespace-normal min-w-[120px] text-center break-words"
+          class="mt-4 px-4 py-2 rounded bg-[#20ecaa] text-white font-semibold shadow hover:bg-[#1bc99a] transition-colors text-base text-center"
         >
           Agendar reunión
         </a>
