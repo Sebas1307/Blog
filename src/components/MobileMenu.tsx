@@ -51,56 +51,56 @@ export default function MobileMenu({ navItems, currentPath }: MobileMenuProps) {
         </svg>
       </button>
 
-      <div
-        className={`md:hidden fixed inset-0 w-full h-full bg-white opacity-100 z-[2147483647] transition-all duration-300 transform ${
-          isOpen ? 'translate-x-0' : 'translate-x-full'
-        }`}
-        style={{ zIndex: 2147483647 }}
-      >
-        <div className="flex flex-col space-y-6 mt-20 px-6 py-8 bg-white">
-          <button
-            onClick={handleClose}
-            className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-200 focus:outline-none"
-            aria-label="Cerrar menú"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              className="w-7 h-7 text-gray-700"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
-
-          {navItems.map((item) => (
-            <a
-              key={item.href}
-              href={item.href}
+      {isOpen && (
+        <div
+          className="md:hidden fixed inset-0 w-full h-full bg-white opacity-100 z-[2147483647] transition-all duration-300"
+          style={{ zIndex: 2147483647 }}
+        >
+          <div className="flex flex-col space-y-6 mt-20 px-6 py-8 bg-white">
+            <button
               onClick={handleClose}
-              className={`text-gray-700 hover:text-[#20ecaa] transition-colors text-lg font-medium ${
-                currentPath === item.href ? 'text-[#20ecaa]' : ''
-              }`}
+              className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-200 focus:outline-none"
+              aria-label="Cerrar menú"
             >
-              {item.text}
-            </a>
-          ))}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                className="w-7 h-7 text-gray-700"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
 
-          <a
-            href="/about"
-            onClick={handleClose}
-            className="text-gray-700 hover:text-[#20ecaa] transition-colors text-lg font-medium"
-          >
-            Sobre mí
-          </a>
+            {navItems.map((item) => (
+              <a
+                key={item.href}
+                href={item.href}
+                onClick={handleClose}
+                className={`text-gray-700 hover:text-[#20ecaa] transition-colors text-lg font-medium ${
+                  currentPath === item.href ? 'text-[#20ecaa]' : ''
+                }`}
+              >
+                {item.text}
+              </a>
+            ))}
+
+            <a
+              href="/about"
+              onClick={handleClose}
+              className="text-gray-700 hover:text-[#20ecaa] transition-colors text-lg font-medium"
+            >
+              Sobre mí
+            </a>
+          </div>
         </div>
-      </div>
+      )}
     </>
   );
 } 
