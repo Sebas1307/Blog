@@ -12,15 +12,16 @@ export const SOCIAL_LINKS = [
    },
    {
       id: 'instagram',
-      href: 'https://www.instagram.com/sebass_caro?igsh=MTNpMHc3bTU4bGptbw%3D%3D&utm_source=qr',
+      href: 'https://www.instagram.com/sebitasfinanzas?igsh=MWVxdWZzbGY5a3VqbA%3D%3D&utm_source=qr',
       text: 'Instagram',
       svg: '/instagram.svg'
    },
-   // {
-   //    id: 'youtube',
-   //    href: 'https://x.com/sebastianpa138',
-   //    text: 'YouTube'
-   // },
+   {
+      id: 'youtube',
+      href: 'https://youtube.com/@sebitasfinanzas?si=uLFCYBPJb21tKsBO',
+      text: 'YouTube',
+      svg: '/youtube.svg'
+   },
    {
       id: 'twitter',
       href: 'https://x.com/sebastianpa138',
