@@ -1,64 +1,23 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { supabase } from '../../db/supabase'
 import ArticleForm from './ArticleForm'
 import ArticleList from './ArticleList'
 import type { Article } from '../../types/article'
 
-export default function Dashboard() {
-  const [articles, setArticles] = useState<Article[]>([])
+export default function Dashboard({ articulos }: { articulos: Article[] }) {
+  const [articles, setArticles] = useState<Article[]>(articulos || [])
   const [message, setMessage] = useState<{
     text: string
     type: 'success' | 'error'
   } | null>(null)
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    console.log('Iniciando carga de artículos...')
-    fetchArticles()
-  }, [])
-
-  const fetchArticles = async () => {
-    try {
-      setIsLoading(true)
-      console.log('Conectando a Supabase...')
-      console.log('URL de Supabase:', import.meta.env.PUBLIC_SUPABASE_URL)
-      console.log('Clave de Supabase configurada:', !!import.meta.env.PUBLIC_SUPABASE_ANON_KEY)
-
-      const { data, error } = await supabase.from('Articulos').select('*')
-
-      console.log("Respuesta completa de Supabase:", { data, error })
-      if (error) {
-        console.error('Error detallado de Supabase:', {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code
-        })
-        setMessage({
-          text: `Error al cargar los artículos: ${error.message}`,
-          type: 'error'
-        })
-        return
-      }
-
-      console.log('Artículos cargados:', data)
-      setArticles(data || [])
-    } catch (error) {
-      console.error('Error inesperado:', error)
-      setMessage({
-        text: 'Error de conexión con la base de datos',
-        type: 'error'
-      })
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  const [isLoading, setIsLoading] = useState(false)
+  const [isPreviewMode, setIsPreviewMode] = useState(false)
 
   const handleCreateOrUpdate = async (articleData: Partial<Article>) => {
     try {
+      setIsLoading(true)
       if (selectedArticle) {
-        // Actualizar artículo existente
         const { error } = await supabase
           .from('Articulos')
           .update(articleData)
@@ -70,15 +29,20 @@ export default function Dashboard() {
           type: 'success'
         })
       } else {
-        // Crear nuevo artículo
         const { error } = await supabase.from('Articulos').insert([articleData])
         if (error) throw error
         setMessage({ text: 'Artículo creado correctamente', type: 'success' })
       }
-      await fetchArticles()
+      
+      const { data, error } = await supabase.from('Articulos').select('*')
+      if (error) throw error
+      setArticles(data || [])
       setSelectedArticle(null)
+      setIsPreviewMode(false)
     } catch (error: any) {
       setMessage({ text: `Error: ${error.message}`, type: 'error' })
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -86,17 +50,31 @@ export default function Dashboard() {
     if (!confirm('¿Estás seguro de que deseas eliminar este artículo?')) return
 
     try {
+      setIsLoading(true)
       const { error } = await supabase.from('Articulos').delete().eq('id', id)
       if (error) throw error
       setMessage({ text: 'Artículo eliminado correctamente', type: 'success' })
-      await fetchArticles()
+      
+      const { data, error: fetchError } = await supabase.from('Articulos').select('*')
+      if (fetchError) throw fetchError
+      setArticles(data || [])
+      setSelectedArticle(null)
+      setIsPreviewMode(false)
     } catch (error: any) {
       setMessage({ text: `Error al eliminar: ${error.message}`, type: 'error' })
+    } finally {
+      setIsLoading(false)
     }
   }
 
   const handleEdit = (article: Article) => {
     setSelectedArticle(article)
+    setIsPreviewMode(true)
+  }
+
+  const handleCancel = () => {
+    setSelectedArticle(null)
+    setIsPreviewMode(false)
   }
 
   return (
@@ -119,20 +97,77 @@ export default function Dashboard() {
 
       {isLoading ? (
         <div className='text-center py-4'>
-          <p className='text-gray-600'>Cargando artículos...</p>
+          <p className='text-gray-600'>Cargando...</p>
         </div>
       ) : (
         <div className='grid grid-cols-1 lg:grid-cols-2 gap-8'>
-          <ArticleList
-            articles={articles}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
-          <ArticleForm
-            onSubmit={handleCreateOrUpdate}
-            selectedArticle={selectedArticle}
-            onCancel={() => setSelectedArticle(null)}
-          />
+          <div>
+            <ArticleList
+              articles={articles}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+            {!isPreviewMode && (
+              <ArticleForm
+                onSubmit={handleCreateOrUpdate}
+                selectedArticle={selectedArticle}
+                onCancel={handleCancel}
+              />
+            )}
+          </div>
+          
+          {isPreviewMode && selectedArticle && (
+            <div className='bg-white p-6 rounded-lg shadow-md'>
+              <div className='flex justify-between items-center mb-4'>
+                <h2 className='text-2xl font-bold text-gray-800'>Vista Previa</h2>
+                <button
+                  onClick={() => setIsPreviewMode(false)}
+                  className='text-blue-600 hover:text-blue-800'
+                >
+                  Editar
+                </button>
+              </div>
+              <div className='prose max-w-none'>
+                <h1 className='text-3xl font-bold mb-4'>{selectedArticle.title}</h1>
+                <div className='mb-4'>
+                  <span className='text-sm text-gray-500'>
+                    {selectedArticle.pub_date && new Date(selectedArticle.pub_date).toLocaleDateString()}
+                  </span>
+                </div>
+                <div className='mb-4'>
+                  <img
+                    src={selectedArticle.hero_image}
+                    alt={selectedArticle.title}
+                    className='w-full h-48 object-cover rounded-lg'
+                  />
+                </div>
+                <div className='text-gray-700 whitespace-pre-wrap'>
+                  {selectedArticle.content}
+                </div>
+                {selectedArticle.SEO && (
+                  <div className='mt-4 p-4 bg-gray-50 rounded-lg'>
+                    <h3 className='text-lg font-semibold mb-2'>SEO</h3>
+                    <p className='text-sm text-gray-600'>
+                      <strong>Título SEO:</strong> {selectedArticle.SEO.title}
+                    </p>
+                    <p className='text-sm text-gray-600'>
+                      <strong>Descripción SEO:</strong> {selectedArticle.SEO.description}
+                    </p>
+                  </div>
+                )}
+                <div className='mt-4 flex flex-wrap gap-2'>
+                  <span className='px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm'>
+                    {selectedArticle.category}
+                  </span>
+                  {selectedArticle.published && (
+                    <span className='px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm'>
+                      Publicado
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

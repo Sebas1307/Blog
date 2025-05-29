@@ -1,6 +1,6 @@
 ---
 import MainLayout from '../layouts/MainLayout.astro'
-import Dashboard from '../components/Dashboard/Dashboard'
+import DashboardComponent from '../components/Dashboard/Dashboard'
 import { supabase } from '../db/supabase'
 
 // Verificar si hay una sesión válida
@@ -14,6 +14,13 @@ if (!session) {
       encodeURIComponent('Debes iniciar sesión para acceder al dashboard')
   )
 }
+
+// Obtener los artículos
+const { data: articulos, error } = await supabase.from('Articulos').select('*')
+
+if (error) {
+  console.error('Error al obtener los artículos:', error)
+}
 ---
 
 <MainLayout
@@ -21,7 +28,7 @@ if (!session) {
   description='CRUD de Artículos'
   dashboard={true}
 >
-  <Dashboard client:load />
+  <DashboardComponent client:load articulos={articulos} />
 </MainLayout>
 
 <style>
