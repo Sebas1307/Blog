@@ -28,7 +28,7 @@ if (error) {
   description='CRUD de Artículos'
   dashboard={true}
 >
-  <DashboardComponent client:load articulos={articulos} />
+  <DashboardComponent client:load articulos={articulos || []} />
 </MainLayout>
 
 <style>

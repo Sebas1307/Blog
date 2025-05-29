@@ -2,210 +2,193 @@ import { useState, useEffect } from 'react'
 import type { Article } from '../../types/article'
 
 interface ArticleFormProps {
-  onSubmit: (articleData: Partial<Article>) => void
-  selectedArticle: Article | null
+  article?: Article
+  onSubmit: (article: Partial<Article>) => void
   onCancel: () => void
 }
 
-export default function ArticleForm({ onSubmit, selectedArticle, onCancel }: ArticleFormProps) {
+export default function ArticleForm({ article, onSubmit, onCancel }: ArticleFormProps) {
   const [formData, setFormData] = useState<Partial<Article>>({
     title: '',
     content: '',
-    SEO: { title: '', description: '' },
-    slug: '',
     category: '',
     hero_image: '',
-    author: '',
     published: false,
-    pub_date: null
+    SEO: {
+      title: '',
+      description: ''
+    }
   })
 
   useEffect(() => {
-    if (selectedArticle) {
-      setFormData(selectedArticle)
+    if (article) {
+      setFormData(article)
     } else {
       setFormData({
         title: '',
         content: '',
-        SEO: { title: '', description: '' },
-        slug: '',
         category: '',
         hero_image: '',
-        author: '',
         published: false,
-        pub_date: null
+        SEO: {
+          title: '',
+          description: ''
+        }
       })
     }
-  }, [selectedArticle])
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value, type } = e.target
-    if (type === 'checkbox') {
-      const checked = (e.target as HTMLInputElement).checked
-      setFormData(prev => ({ ...prev, [name]: checked }))
-    } else if (name === 'SEO') {
-      try {
-        const seoData = JSON.parse(value)
-        setFormData(prev => ({ ...prev, SEO: seoData }))
-      } catch {
-        // Si no es un JSON válido, lo guardamos como string
-        setFormData(prev => ({ ...prev, SEO: { title: value, description: '' } }))
-      }
-    } else {
-      setFormData(prev => ({ ...prev, [name]: value }))
-    }
-  }
+  }, [article])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     onSubmit(formData)
   }
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target
+    if (type === 'checkbox') {
+      const checked = (e.target as HTMLInputElement).checked
+      setFormData(prev => ({ ...prev, [name]: checked }))
+    } else if (name.startsWith('SEO.')) {
+      const seoField = name.split('.')[1]
+      setFormData(prev => ({
+        ...prev,
+        SEO: { ...prev.SEO, [seoField]: value }
+      }))
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }))
+    }
+  }
+
   return (
-    <div className="bg-white p-6 rounded-lg shadow-lg">
-      <h2 className="text-2xl font-semibold mb-6 text-gray-800">
-        {selectedArticle ? 'Editar artículo' : 'Crear nuevo artículo'}
-      </h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="title" className="block text-sm font-medium text-gray-700">
             Título
           </label>
           <input
+            type="text"
+            id="title"
             name="title"
             value={formData.title}
             onChange={handleChange}
-            placeholder="Título del artículo"
-            className="block w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             required
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="content" className="block text-sm font-medium text-gray-700">
             Contenido
           </label>
           <textarea
+            id="content"
             name="content"
             value={formData.content}
             onChange={handleChange}
-            placeholder="Contenido del artículo"
-            className="block w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 h-32"
             required
+            rows={6}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            SEO (JSON)
+          <label htmlFor="category" className="block text-sm font-medium text-gray-700">
+            Categoría
           </label>
-          <textarea
-            name="SEO"
-            value={JSON.stringify(formData.SEO, null, 2)}
+          <select
+            id="category"
+            name="category"
+            value={formData.category}
             onChange={handleChange}
-            placeholder='{"title": "", "description": ""}'
-            className="block w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          />
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Slug
-            </label>
-            <input
-              name="slug"
-              value={formData.slug}
-              onChange={handleChange}
-              placeholder="url-amigable"
-              className="block w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Categoría
-            </label>
-            <input
-              name="category"
-              value={formData.category}
-              onChange={handleChange}
-              placeholder="Categoría"
-              className="block w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
+            required
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+          >
+            <option value="">Seleccionar categoría</option>
+            <option value="Tecnología">Tecnología</option>
+            <option value="Desarrollo">Desarrollo</option>
+            <option value="Diseño">Diseño</option>
+            <option value="Marketing">Marketing</option>
+          </select>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            URL de imagen principal
+          <label htmlFor="hero_image" className="block text-sm font-medium text-gray-700">
+            URL de la imagen principal
           </label>
           <input
+            type="url"
+            id="hero_image"
             name="hero_image"
             value={formData.hero_image}
             onChange={handleChange}
-            placeholder="https://ejemplo.com/imagen.jpg"
-            className="block w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Autor
-          </label>
+        <div className="flex items-center">
           <input
-            name="author"
-            value={formData.author}
+            type="checkbox"
+            id="published"
+            name="published"
+            checked={formData.published}
             onChange={handleChange}
-            placeholder="Nombre del autor"
-            className="block w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
           />
+          <label htmlFor="published" className="ml-2 block text-sm text-gray-700">
+            Publicar artículo
+          </label>
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              name="published"
-              checked={formData.published}
-              onChange={handleChange}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            />
-            <label className="ml-2 block text-sm text-gray-700">Publicado</label>
+        <div className="border-t border-gray-200 pt-4">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Información SEO</h3>
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="SEO.title" className="block text-sm font-medium text-gray-700">
+                Título SEO
+              </label>
+              <input
+                type="text"
+                id="SEO.title"
+                name="SEO.title"
+                value={formData.SEO?.title || ''}
+                onChange={handleChange}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="SEO.description" className="block text-sm font-medium text-gray-700">
+                Descripción SEO
+              </label>
+              <textarea
+                id="SEO.description"
+                name="SEO.description"
+                value={formData.SEO?.description || ''}
+                onChange={handleChange}
+                rows={3}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+              />
+            </div>
           </div>
-
-          <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Fecha de publicación
-            </label>
-            <input
-              name="pub_date"
-              type="date"
-              value={formData.pub_date || ''}
-              onChange={handleChange}
-              className="block w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
         </div>
+      </div>
 
-        <div className="flex gap-4">
-          <button
-            type="submit"
-            className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-          >
-            {selectedArticle ? 'Actualizar' : 'Crear'}
-          </button>
-          {selectedArticle && (
-            <button
-              type="button"
-              onClick={onCancel}
-              className="bg-gray-200 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-            >
-              Cancelar
-            </button>
-          )}
-        </div>
-      </form>
-    </div>
+      <div className="flex justify-end gap-3">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+        >
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+        >
+          {article ? 'Actualizar' : 'Crear'} Artículo
+        </button>
+      </div>
+    </form>
   )
 } 

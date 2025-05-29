@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { supabase } from '../../db/supabase'
 import ArticleForm from './ArticleForm'
 import ArticleList from './ArticleList'
 import type { Article } from '../../types/article'
+
+type PreviewMode = false | 'preview' | 'edit'
 
 export default function Dashboard({ articulos }: { articulos: Article[] }) {
   const [articles, setArticles] = useState<Article[]>(articulos || [])
@@ -12,35 +13,48 @@ export default function Dashboard({ articulos }: { articulos: Article[] }) {
   } | null>(null)
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const [isPreviewMode, setIsPreviewMode] = useState(false)
+  const [isPreviewMode, setIsPreviewMode] = useState<PreviewMode>(false)
 
   const handleCreateOrUpdate = async (articleData: Partial<Article>) => {
     try {
       setIsLoading(true)
-      if (selectedArticle) {
-        const { error } = await supabase
-          .from('Articulos')
-          .update(articleData)
-          .eq('id', selectedArticle.id)
+      setMessage(null)
 
-        if (error) throw error
-        setMessage({
-          text: 'Artículo actualizado correctamente',
-          type: 'success'
-        })
-      } else {
-        const { error } = await supabase.from('Articulos').insert([articleData])
-        if (error) throw error
-        setMessage({ text: 'Artículo creado correctamente', type: 'success' })
-      }
+      const url = selectedArticle 
+        ? `/api/articles/${selectedArticle.id}`
+        : '/api/articles'
       
-      const { data, error } = await supabase.from('Articulos').select('*')
-      if (error) throw error
-      setArticles(data || [])
+      const method = selectedArticle ? 'PUT' : 'POST'
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(articleData),
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.message || 'Error al procesar la operación')
+      }
+
+      const data = await response.json()
+      setArticles(data)
+      setMessage({
+        text: selectedArticle 
+          ? 'Artículo actualizado correctamente'
+          : 'Artículo creado correctamente',
+        type: 'success'
+      })
       setSelectedArticle(null)
       setIsPreviewMode(false)
     } catch (error: any) {
-      setMessage({ text: `Error: ${error.message}`, type: 'error' })
+      console.error('Error en la operación:', error)
+      setMessage({
+        text: `Error: ${error.message || 'Error al procesar la operación'}`,
+        type: 'error'
+      })
     } finally {
       setIsLoading(false)
     }
@@ -51,17 +65,31 @@ export default function Dashboard({ articulos }: { articulos: Article[] }) {
 
     try {
       setIsLoading(true)
-      const { error } = await supabase.from('Articulos').delete().eq('id', id)
-      if (error) throw error
-      setMessage({ text: 'Artículo eliminado correctamente', type: 'success' })
-      
-      const { data, error: fetchError } = await supabase.from('Articulos').select('*')
-      if (fetchError) throw fetchError
-      setArticles(data || [])
+      setMessage(null)
+
+      const response = await fetch(`/api/articles/${id}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.message || 'Error al eliminar el artículo')
+      }
+
+      const data = await response.json()
+      setArticles(data)
+      setMessage({
+        text: 'Artículo eliminado correctamente',
+        type: 'success'
+      })
       setSelectedArticle(null)
       setIsPreviewMode(false)
     } catch (error: any) {
-      setMessage({ text: `Error al eliminar: ${error.message}`, type: 'error' })
+      console.error('Error al eliminar:', error)
+      setMessage({
+        text: `Error al eliminar: ${error.message || 'Error al eliminar el artículo'}`,
+        type: 'error'
+      })
     } finally {
       setIsLoading(false)
     }
@@ -69,26 +97,27 @@ export default function Dashboard({ articulos }: { articulos: Article[] }) {
 
   const handleEdit = (article: Article) => {
     setSelectedArticle(article)
-    setIsPreviewMode(true)
+    setIsPreviewMode('preview')
   }
 
   const handleCancel = () => {
     setSelectedArticle(null)
-    setIsPreviewMode(false)
   }
 
   return (
-    <div className='max-w-4xl mx-auto mt-8 px-4'>
-      <h1 className='text-4xl font-bold mb-8 text-gray-800'>
-        Panel de Control
-      </h1>
+    <div className='max-w-7xl mx-auto mt-8 px-4'>
+      <div className='flex justify-between items-center mb-8'>
+        <h1 className='text-4xl font-bold text-gray-800'>
+          Panel de Control
+        </h1>
+      </div>
 
       {message && (
         <div
-          className={`mb-6 p-4 rounded-lg ${
+          className={`mb-6 p-4 rounded-lg shadow-sm ${
             message.type === 'success'
-              ? 'bg-green-100 text-green-700'
-              : 'bg-red-100 text-red-700'
+              ? 'bg-green-50 text-green-700 border border-green-200'
+              : 'bg-red-50 text-red-700 border border-red-200'
           }`}
         >
           {message.text}
@@ -96,78 +125,37 @@ export default function Dashboard({ articulos }: { articulos: Article[] }) {
       )}
 
       {isLoading ? (
-        <div className='text-center py-4'>
-          <p className='text-gray-600'>Cargando...</p>
+        <div className='flex justify-center items-center py-12'>
+          <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600'></div>
         </div>
       ) : (
         <div className='grid grid-cols-1 lg:grid-cols-2 gap-8'>
-          <div>
-            <ArticleList
-              articles={articles}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
+          {/* Columna 1: Formulario de creación/edición */}
+          <div className='bg-white rounded-xl shadow-sm border border-gray-100 p-6 h-fit'>
+            <h2 className='text-xl font-semibold text-gray-800 mb-4'>
+              {selectedArticle ? 'Editar artículo' : 'Crear nuevo artículo'}
+            </h2>
+            <ArticleForm
+              onSubmit={handleCreateOrUpdate}
+              article={selectedArticle || undefined}
+              onCancel={handleCancel}
             />
-            {!isPreviewMode && (
-              <ArticleForm
-                onSubmit={handleCreateOrUpdate}
-                selectedArticle={selectedArticle}
-                onCancel={handleCancel}
-              />
-            )}
           </div>
-          
-          {isPreviewMode && selectedArticle && (
-            <div className='bg-white p-6 rounded-lg shadow-md'>
-              <div className='flex justify-between items-center mb-4'>
-                <h2 className='text-2xl font-bold text-gray-800'>Vista Previa</h2>
-                <button
-                  onClick={() => setIsPreviewMode(false)}
-                  className='text-blue-600 hover:text-blue-800'
-                >
-                  Editar
-                </button>
+          {/* Columna 2: Lista de artículos */}
+          <div className='space-y-8'>
+            <div className='bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden'>
+              <div className='p-6 border-b border-gray-100'>
+                <h2 className='text-xl font-semibold text-gray-800'>
+                  Lista de Artículos
+                </h2>
               </div>
-              <div className='prose max-w-none'>
-                <h1 className='text-3xl font-bold mb-4'>{selectedArticle.title}</h1>
-                <div className='mb-4'>
-                  <span className='text-sm text-gray-500'>
-                    {selectedArticle.pub_date && new Date(selectedArticle.pub_date).toLocaleDateString()}
-                  </span>
-                </div>
-                <div className='mb-4'>
-                  <img
-                    src={selectedArticle.hero_image}
-                    alt={selectedArticle.title}
-                    className='w-full h-48 object-cover rounded-lg'
-                  />
-                </div>
-                <div className='text-gray-700 whitespace-pre-wrap'>
-                  {selectedArticle.content}
-                </div>
-                {selectedArticle.SEO && (
-                  <div className='mt-4 p-4 bg-gray-50 rounded-lg'>
-                    <h3 className='text-lg font-semibold mb-2'>SEO</h3>
-                    <p className='text-sm text-gray-600'>
-                      <strong>Título SEO:</strong> {selectedArticle.SEO.title}
-                    </p>
-                    <p className='text-sm text-gray-600'>
-                      <strong>Descripción SEO:</strong> {selectedArticle.SEO.description}
-                    </p>
-                  </div>
-                )}
-                <div className='mt-4 flex flex-wrap gap-2'>
-                  <span className='px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm'>
-                    {selectedArticle.category}
-                  </span>
-                  {selectedArticle.published && (
-                    <span className='px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm'>
-                      Publicado
-                    </span>
-                  )}
-                </div>
-              </div>
+              <ArticleList
+                articles={articles}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
             </div>
-          )}
+          </div>
         </div>
       )}
     </div>
